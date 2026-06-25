@@ -9,116 +9,62 @@ interface TimelineViewProps {
   events: Event[]
 }
 
-// Bubble diameter by significance
-const SIZE: Record<number, number> = { 1: 82, 2: 100, 3: 118, 4: 138, 5: 162 }
+const SIZE: Record<number, number> = { 1: 76, 2: 90, 3: 106, 4: 122, 5: 142 }
 
-// Staggered x-positions so bubbles float in an organic wave
-const X_OFFSETS = [8, 52, 12, 60, 4, 56, 16, 48]
-
-function FloatingBubble({
-  event,
-  color,
-  index,
-  onClick,
-}: {
-  event: Event
-  color: { bg: string; light: string }
-  index: number
-  onClick: () => void
-}) {
-  const size = SIZE[event.significance]
-  const xOffset = X_OFFSETS[index % X_OFFSETS.length]
-  const floatDelay = (index * 0.37) % 2.4
-  const floatDuration = 3.2 + (index % 3) * 0.6
-
-  const month = new Date(event.date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
-
-  return (
-    <motion.div
-      className="flex flex-col items-center cursor-pointer select-none"
-      style={{ marginLeft: xOffset, width: size }}
-      initial={{ opacity: 0, scale: 0.4, y: 30 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.5, type: 'spring', stiffness: 260, damping: 22 }}
-    >
-      {/* Floating animation wrapper */}
-      <motion.div
-        animate={{ y: [0, -8, 0] }}
-        transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
-        className="flex flex-col items-center"
-      >
-        {/* Glow ring */}
-        <motion.div
-          className="absolute rounded-full"
-          style={{
-            width: size + 20,
-            height: size + 20,
-            background: `radial-gradient(circle, ${color.bg}30 0%, transparent 70%)`,
-            filter: 'blur(8px)',
-          }}
-          animate={{ scale: [1, 1.12, 1], opacity: [0.6, 1, 0.6] }}
-          transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
-        />
-
-        {/* Main bubble */}
-        <motion.button
-          onClick={onClick}
-          whileTap={{ scale: 0.92 }}
-          whileHover={{ scale: 1.07 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-          className="relative rounded-full flex items-center justify-center text-white font-semibold text-center leading-tight"
-          style={{
-            width: size,
-            height: size,
-            background: `radial-gradient(circle at 35% 30%, ${lighten(color.bg)}, ${color.bg} 65%)`,
-            boxShadow: `0 8px 32px ${color.bg}70, 0 2px 8px ${color.bg}40, inset 0 1px 0 rgba(255,255,255,0.25)`,
-            fontSize: size > 130 ? 12 : size > 100 ? 10 : 9,
-            padding: 14,
-          }}
-          aria-label={event.title}
-        >
-          {/* Shine highlight */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: size * 0.45,
-              height: size * 0.3,
-              background: 'radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, transparent 100%)',
-              top: '14%',
-              left: '18%',
-            }}
-          />
-          <span className="relative leading-tight z-10 text-center">
-            {event.title.length > 18 ? event.title.slice(0, 16) + '…' : event.title}
-          </span>
-        </motion.button>
-
-        {/* Date label */}
-        <div className="mt-2 flex flex-col items-center">
-          <span className="text-[10px] font-semibold text-gray-400">{month}</span>
-          {event.subEvents.length > 0 && (
-            <div className="flex gap-0.5 mt-1">
-              {Array.from({ length: Math.min(event.subEvents.length, 4) }).map((_, i) => (
-                <div key={i} className="w-1 h-1 rounded-full" style={{ background: color.bg, opacity: 0.6 }} />
-              ))}
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// Lighten a hex color slightly for the radial highlight
 function lighten(hex: string): string {
-  const n = parseInt(hex.slice(1), 16)
+  const n = parseInt(hex.replace('#', ''), 16)
   const r = Math.min(255, (n >> 16) + 60)
   const g = Math.min(255, ((n >> 8) & 0xff) + 60)
   const b = Math.min(255, (n & 0xff) + 60)
   return `rgb(${r},${g},${b})`
+}
+
+// Auto-scale font size to fit title in bubble
+function fontSize(title: string, size: number): number {
+  const words = title.split(' ').length
+  const chars = title.length
+  if (chars <= 8) return Math.min(13, size * 0.13)
+  if (chars <= 14) return Math.min(12, size * 0.115)
+  if (chars <= 20) return Math.min(11, size * 0.105)
+  if (words <= 4) return Math.min(10, size * 0.095)
+  return Math.min(9.5, size * 0.088)
+}
+
+// Progress ring SVG around bubble
+function ProgressRing({ size, count, color }: { size: number; count: number; color: string }) {
+  if (count === 0) return null
+  const r = size / 2 + 7
+  const circ = 2 * Math.PI * r
+  const filled = Math.min(count / 5, 1) * circ
+  return (
+    <svg
+      className="absolute pointer-events-none"
+      style={{ left: -7, top: -7 }}
+      width={size + 14}
+      height={size + 14}
+    >
+      {/* Track */}
+      <circle cx={(size + 14) / 2} cy={(size + 14) / 2} r={r} fill="none" stroke={`${color}22`} strokeWidth={3} />
+      {/* Progress */}
+      <motion.circle
+        cx={(size + 14) / 2}
+        cy={(size + 14) / 2}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth={3}
+        strokeLinecap="round"
+        strokeDasharray={circ}
+        strokeDashoffset={circ - filled}
+        rotate="-90"
+        style={{ transformOrigin: 'center', transform: 'rotate(-90deg)' }}
+        initial={{ strokeDashoffset: circ }}
+        animate={{ strokeDashoffset: circ - filled }}
+        transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+        opacity={0.8}
+      />
+    </svg>
+  )
 }
 
 function groupByYear(events: Event[]) {
@@ -154,7 +100,7 @@ export function TimelineView({ events }: TimelineViewProps) {
   let globalIndex = 0
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {byYear.map(([year, yearEvents]) => {
         const sorted = [...yearEvents].sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -164,29 +110,144 @@ export function TimelineView({ events }: TimelineViewProps) {
           <div key={year}>
             {/* Year label */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center gap-3 mb-5 px-1"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-3 mb-6"
             >
-              <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{year}</span>
+              <span className="text-sm font-black text-gray-300 tracking-widest">{year}</span>
               <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent" />
             </motion.div>
 
-            {/* Bubble cluster — wrap naturally with stagger */}
-            <div className="flex flex-wrap gap-y-6 gap-x-1 items-end">
-              {sorted.map(event => {
-                const idx = globalIndex++
-                const color = getEventColor(allIds.indexOf(event.id))
-                return (
-                  <FloatingBubble
-                    key={event.id}
-                    event={event}
-                    color={color}
-                    index={idx}
-                    onClick={() => router.push(`/event/${event.id}`)}
-                  />
-                )
-              })}
+            {/* Zigzag chronological timeline */}
+            <div className="relative">
+              {/* Center spine */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-violet-200 via-blue-100 to-transparent" />
+
+              <div className="space-y-2">
+                {sorted.map((event, i) => {
+                  const idx = globalIndex++
+                  const color = getEventColor(allIds.indexOf(event.id))
+                  const size = SIZE[event.significance]
+                  const isLeft = i % 2 === 0
+                  const floatDuration = 3.4 + (idx % 4) * 0.5
+                  const floatDelay = (idx * 0.41) % 2.8
+                  const month = new Date(event.date).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                  const fs = fontSize(event.title, size)
+
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, x: isLeft ? -40 : 40, scale: 0.7 }}
+                      animate={{ opacity: 1, x: 0, scale: 1 }}
+                      transition={{ delay: idx * 0.06, duration: 0.45, type: 'spring', stiffness: 240, damping: 22 }}
+                      className={`flex items-center gap-2 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}
+                      style={{ minHeight: size + 32 }}
+                    >
+                      {/* Bubble side */}
+                      <div className={`flex-1 flex ${isLeft ? 'justify-end pr-3' : 'justify-start pl-3'}`}>
+                        <motion.div
+                          className="flex flex-col items-center"
+                          animate={{ y: [0, -7, 0] }}
+                          transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
+                        >
+                          {/* Glow halo */}
+                          <div
+                            className="absolute rounded-full pointer-events-none"
+                            style={{
+                              width: size + 28,
+                              height: size + 28,
+                              background: `radial-gradient(circle, ${color.bg}28 0%, transparent 70%)`,
+                              filter: 'blur(10px)',
+                              top: -14, left: -14,
+                            }}
+                          />
+
+                          {/* Bubble + progress ring */}
+                          <div className="relative cursor-pointer" onClick={() => router.push(`/event/${event.id}`)}>
+                            <ProgressRing size={size} count={event.subEvents.length} color={color.bg} />
+
+                            <motion.div
+                              whileTap={{ scale: 0.91 }}
+                              whileHover={{ scale: 1.06 }}
+                              transition={{ type: 'spring', stiffness: 380, damping: 20 }}
+                              className="relative rounded-full flex items-center justify-center text-white font-semibold text-center overflow-hidden"
+                              style={{
+                                width: size,
+                                height: size,
+                                background: `radial-gradient(circle at 35% 28%, ${lighten(color.bg)}, ${color.bg} 68%)`,
+                                boxShadow: `0 10px 36px ${color.bg}75, 0 3px 10px ${color.bg}45, inset 0 1px 0 rgba(255,255,255,0.28)`,
+                                fontSize: fs,
+                                lineHeight: 1.25,
+                                padding: '14px',
+                              }}
+                            >
+                              {/* Shine */}
+                              <div className="absolute rounded-full pointer-events-none" style={{ width: size * 0.44, height: size * 0.28, background: 'radial-gradient(ellipse, rgba(255,255,255,0.38) 0%, transparent 100%)', top: '13%', left: '17%' }} />
+                              <span className="relative z-10 leading-snug">{event.title}</span>
+                            </motion.div>
+                          </div>
+
+                          {/* Date + sub-dot indicators */}
+                          <div className="mt-2 flex flex-col items-center gap-1">
+                            <span className="text-[10px] font-semibold text-gray-400">{month}</span>
+                            {event.subEvents.length > 0 && (
+                              <div className="flex gap-0.5">
+                                {Array.from({ length: Math.min(event.subEvents.length, 5) }).map((_, di) => (
+                                  <motion.div
+                                    key={di}
+                                    className="w-1 h-1 rounded-full"
+                                    style={{ background: color.bg, opacity: 0.55 }}
+                                    animate={{ scale: [1, 1.4, 1] }}
+                                    transition={{ duration: 2, delay: di * 0.3, repeat: Infinity }}
+                                  />
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      </div>
+
+                      {/* Center dot */}
+                      <div className="flex-shrink-0 flex flex-col items-center z-10">
+                        <motion.div
+                          className="w-3 h-3 rounded-full border-2 border-white shadow-md"
+                          style={{ background: color.bg, boxShadow: `0 0 8px ${color.bg}80` }}
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity }}
+                        />
+                      </div>
+
+                      {/* Info side */}
+                      <div className={`flex-1 ${isLeft ? 'pl-3' : 'pr-3 text-right'}`}>
+                        <motion.div
+                          whileTap={{ scale: 0.97 }}
+                          onClick={() => router.push(`/event/${event.id}`)}
+                          className="inline-block cursor-pointer"
+                        >
+                          <div className="flex flex-wrap gap-1 mb-1" style={{ justifyContent: isLeft ? 'flex-start' : 'flex-end' }}>
+                            {event.skills.slice(0, 2).map(s => (
+                              <span key={s} className="text-[9px] px-2 py-0.5 rounded-full font-semibold" style={{ background: color.light, color: color.bg }}>
+                                {s}
+                              </span>
+                            ))}
+                          </div>
+                          {event.visibility === 'portfolio' && (
+                            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: color.bg }}>
+                              ✦ Portfolio
+                            </span>
+                          )}
+                          {event.subEvents.length > 0 && (
+                            <p className="text-[10px] text-gray-400 mt-0.5">{event.subEvents.length} micro-win{event.subEvents.length > 1 ? 's' : ''}</p>
+                          )}
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
             </div>
           </div>
         )
