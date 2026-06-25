@@ -28,6 +28,14 @@ function SignificanceDots({ value, color }: { value: number; color: string }) {
   )
 }
 
+function lightenHex(hex: string): string {
+  const n = parseInt(hex.replace('#',''), 16)
+  const r = Math.min(255, (n >> 16) + 55)
+  const g = Math.min(255, ((n >> 8) & 0xff) + 55)
+  const b = Math.min(255, (n & 0xff) + 55)
+  return `rgb(${r},${g},${b})`
+}
+
 // Orbital layout: place sub-event bubbles around the central event
 function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: string[]; onSubClick: (subId: string) => void }) {
   const subs = event.subEvents
@@ -64,22 +72,22 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
             transition={{ delay: 0.1 + i * 0.08, type: 'spring', stiffness: 300, damping: 22 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => onSubClick(sub.id)}
-            className="absolute rounded-full flex items-center justify-center shadow-lg text-white font-semibold text-center leading-tight cursor-pointer"
+            className="absolute rounded-full flex items-center justify-center text-white font-semibold text-center leading-tight cursor-pointer overflow-hidden"
             style={{
               width: size,
               height: size,
-              background: subColor,
-              boxShadow: `0 6px 20px ${subColor}55`,
-              // Start centered (50%,50%) then offset by position
+              background: `radial-gradient(circle at 35% 30%, ${subColor}dd, ${subColor} 70%)`,
+              boxShadow: `0 8px 28px ${subColor}70, 0 2px 8px ${subColor}40, inset 0 1px 0 rgba(255,255,255,0.25)`,
               top: '50%',
               left: '50%',
               marginTop: -size / 2 + pos.y,
               marginLeft: -size / 2 + pos.x,
-              fontSize: 9,
-              padding: 6,
+              fontSize: size > 90 ? 10 : 9,
+              padding: 8,
             }}
           >
-            <span className="leading-tight">{sub.title.length > 14 ? sub.title.slice(0, 12) + '…' : sub.title}</span>
+            <div className="absolute rounded-full pointer-events-none" style={{ width: size * 0.45, height: size * 0.28, background: 'radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, transparent 100%)', top: '13%', left: '18%' }} />
+            <span className="relative leading-tight z-10">{sub.title.length > 14 ? sub.title.slice(0, 12) + '…' : sub.title}</span>
           </motion.button>
         )
       })}
@@ -89,17 +97,18 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-        className="relative z-10 rounded-full flex items-center justify-center shadow-2xl text-white font-bold text-center leading-tight"
+        className="relative z-10 rounded-full flex items-center justify-center text-white font-bold text-center leading-tight overflow-hidden"
         style={{
-          width: 110,
-          height: 110,
-          background: centerColor,
-          boxShadow: `0 12px 36px ${centerColor}60`,
+          width: 120,
+          height: 120,
+          background: `radial-gradient(circle at 35% 30%, ${lightenHex(centerColor)}, ${centerColor} 65%)`,
+          boxShadow: `0 12px 40px ${centerColor}80, 0 4px 12px ${centerColor}50, inset 0 1px 0 rgba(255,255,255,0.3)`,
           fontSize: 11,
-          padding: 12,
+          padding: 14,
         }}
       >
-        <span className="leading-tight">{event.title.length > 20 ? event.title.slice(0, 18) + '…' : event.title}</span>
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 54, height: 34, background: 'radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 100%)', top: '13%', left: '18%' }} />
+        <span className="relative leading-tight z-10">{event.title.length > 20 ? event.title.slice(0, 18) + '…' : event.title}</span>
       </motion.div>
     </div>
   )

@@ -30,7 +30,7 @@ export default function HomePage() {
   })
 
   return (
-    <PageShell>
+    <PageShell className="bubble-bg">
       {/* Header */}
       <div className="mb-6">
         <p className="text-xs font-semibold text-violet-500 uppercase tracking-widest mb-1">Your Story</p>

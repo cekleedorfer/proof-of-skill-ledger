@@ -3,11 +3,122 @@
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Event } from '@/types'
-import { EventBubble } from './EventBubble'
 import { getEventColor } from '@/lib/colors'
 
 interface TimelineViewProps {
   events: Event[]
+}
+
+// Bubble diameter by significance
+const SIZE: Record<number, number> = { 1: 82, 2: 100, 3: 118, 4: 138, 5: 162 }
+
+// Staggered x-positions so bubbles float in an organic wave
+const X_OFFSETS = [8, 52, 12, 60, 4, 56, 16, 48]
+
+function FloatingBubble({
+  event,
+  color,
+  index,
+  onClick,
+}: {
+  event: Event
+  color: { bg: string; light: string }
+  index: number
+  onClick: () => void
+}) {
+  const size = SIZE[event.significance]
+  const xOffset = X_OFFSETS[index % X_OFFSETS.length]
+  const floatDelay = (index * 0.37) % 2.4
+  const floatDuration = 3.2 + (index % 3) * 0.6
+
+  const month = new Date(event.date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+
+  return (
+    <motion.div
+      className="flex flex-col items-center cursor-pointer select-none"
+      style={{ marginLeft: xOffset, width: size }}
+      initial={{ opacity: 0, scale: 0.4, y: 30 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.5, type: 'spring', stiffness: 260, damping: 22 }}
+    >
+      {/* Floating animation wrapper */}
+      <motion.div
+        animate={{ y: [0, -8, 0] }}
+        transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
+        className="flex flex-col items-center"
+      >
+        {/* Glow ring */}
+        <motion.div
+          className="absolute rounded-full"
+          style={{
+            width: size + 20,
+            height: size + 20,
+            background: `radial-gradient(circle, ${color.bg}30 0%, transparent 70%)`,
+            filter: 'blur(8px)',
+          }}
+          animate={{ scale: [1, 1.12, 1], opacity: [0.6, 1, 0.6] }}
+          transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
+        />
+
+        {/* Main bubble */}
+        <motion.button
+          onClick={onClick}
+          whileTap={{ scale: 0.92 }}
+          whileHover={{ scale: 1.07 }}
+          transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+          className="relative rounded-full flex items-center justify-center text-white font-semibold text-center leading-tight"
+          style={{
+            width: size,
+            height: size,
+            background: `radial-gradient(circle at 35% 30%, ${lighten(color.bg)}, ${color.bg} 65%)`,
+            boxShadow: `0 8px 32px ${color.bg}70, 0 2px 8px ${color.bg}40, inset 0 1px 0 rgba(255,255,255,0.25)`,
+            fontSize: size > 130 ? 12 : size > 100 ? 10 : 9,
+            padding: 14,
+          }}
+          aria-label={event.title}
+        >
+          {/* Shine highlight */}
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              width: size * 0.45,
+              height: size * 0.3,
+              background: 'radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, transparent 100%)',
+              top: '14%',
+              left: '18%',
+            }}
+          />
+          <span className="relative leading-tight z-10 text-center">
+            {event.title.length > 18 ? event.title.slice(0, 16) + '…' : event.title}
+          </span>
+        </motion.button>
+
+        {/* Date label */}
+        <div className="mt-2 flex flex-col items-center">
+          <span className="text-[10px] font-semibold text-gray-400">{month}</span>
+          {event.subEvents.length > 0 && (
+            <div className="flex gap-0.5 mt-1">
+              {Array.from({ length: Math.min(event.subEvents.length, 4) }).map((_, i) => (
+                <div key={i} className="w-1 h-1 rounded-full" style={{ background: color.bg, opacity: 0.6 }} />
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// Lighten a hex color slightly for the radial highlight
+function lighten(hex: string): string {
+  const n = parseInt(hex.slice(1), 16)
+  const r = Math.min(255, (n >> 16) + 60)
+  const g = Math.min(255, ((n >> 8) & 0xff) + 60)
+  const b = Math.min(255, (n & 0xff) + 60)
+  return `rgb(${r},${g},${b})`
 }
 
 function groupByYear(events: Event[]) {
@@ -26,7 +137,13 @@ export function TimelineView({ events }: TimelineViewProps) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="text-5xl mb-4">🌱</div>
+        <motion.div
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          className="text-6xl mb-4"
+        >
+          🫧
+        </motion.div>
         <p className="text-gray-400 text-sm">No events yet. Tap + to add your first milestone.</p>
       </div>
     )
@@ -34,96 +151,46 @@ export function TimelineView({ events }: TimelineViewProps) {
 
   const allIds = events.map(e => e.id)
   const byYear = groupByYear(events)
+  let globalIndex = 0
 
   return (
-    <div className="relative">
-      {/* Vertical line */}
-      <div className="absolute left-[28px] top-6 bottom-0 w-0.5 bg-gradient-to-b from-violet-300 via-blue-200 to-transparent z-0" />
+    <div className="space-y-8">
+      {byYear.map(([year, yearEvents]) => {
+        const sorted = [...yearEvents].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        )
 
-      <div className="space-y-6">
-        {byYear.map(([year, yearEvents]) => {
-          const sorted = [...yearEvents].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-          return (
-            <div key={year}>
-              {/* Year label */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-14 h-6 flex items-center justify-center">
-                  <span className="text-xs font-bold text-gray-400 bg-[#f5f5f7] px-1 relative z-10">{year}</span>
-                </div>
-              </div>
+        return (
+          <div key={year}>
+            {/* Year label */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center gap-3 mb-5 px-1"
+            >
+              <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{year}</span>
+              <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent" />
+            </motion.div>
 
-              {/* Events in this year */}
-              <div className="space-y-3">
-                {sorted.map((event, i) => {
-                  const color = getEventColor(allIds.indexOf(event.id)).bg
-                  const month = new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                  return (
-                    <motion.div
-                      key={event.id}
-                      initial={{ opacity: 0, x: -16 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05, duration: 0.35, ease: 'easeOut' }}
-                      className="flex items-center gap-3"
-                    >
-                      {/* Dot on line */}
-                      <div className="flex-shrink-0 flex items-center justify-center z-10" style={{ width: 56 }}>
-                        <div className="w-3 h-3 rounded-full border-2 border-white shadow-sm" style={{ background: color }} />
-                      </div>
-
-                      {/* Bubble + card row */}
-                      <div
-                        className="flex-1 flex items-center gap-3 cursor-pointer"
-                        onClick={() => router.push(`/event/${event.id}`)}
-                      >
-                        {/* Mini bubble */}
-                        <div
-                          className="flex-shrink-0 rounded-full flex items-center justify-center shadow-md text-white font-bold text-center leading-tight"
-                          style={{
-                            width: 48 + event.significance * 6,
-                            height: 48 + event.significance * 6,
-                            background: color,
-                            boxShadow: `0 4px 14px ${color}55`,
-                            fontSize: 9,
-                            padding: 4,
-                          }}
-                        >
-                          <span className="leading-tight text-center">
-                            {event.title.length > 14 ? event.title.slice(0, 12) + '…' : event.title}
-                          </span>
-                        </div>
-
-                        {/* Card */}
-                        <motion.div
-                          whileTap={{ scale: 0.98 }}
-                          className="flex-1 bg-white rounded-2xl p-3 shadow-sm border border-gray-100 min-w-0"
-                        >
-                          <div className="flex items-start justify-between gap-1 mb-0.5">
-                            <h3 className="font-semibold text-[13px] text-gray-900 leading-snug">{event.title}</h3>
-                            {event.visibility === 'portfolio' && (
-                              <span className="text-[9px] bg-violet-50 text-violet-600 border border-violet-100 rounded-full px-1.5 py-0.5 flex-shrink-0 font-semibold">Portfolio</span>
-                            )}
-                          </div>
-                          <p className="text-[10px] text-gray-400 font-medium mb-1.5">{month}</p>
-                          <div className="flex items-center gap-1 flex-wrap">
-                            {event.skills.slice(0, 2).map(s => (
-                              <span key={s} className="text-[9px] px-2 py-0.5 rounded-full font-medium" style={{ background: getEventColor(allIds.indexOf(event.id)).light, color: getEventColor(allIds.indexOf(event.id)).bg }}>
-                                {s}
-                              </span>
-                            ))}
-                            {event.subEvents.length > 0 && (
-                              <span className="text-[9px] text-gray-400 ml-auto">{event.subEvents.length} wins</span>
-                            )}
-                          </div>
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  )
-                })}
-              </div>
+            {/* Bubble cluster — wrap naturally with stagger */}
+            <div className="flex flex-wrap gap-y-6 gap-x-1 items-end">
+              {sorted.map(event => {
+                const idx = globalIndex++
+                const color = getEventColor(allIds.indexOf(event.id))
+                return (
+                  <FloatingBubble
+                    key={event.id}
+                    event={event}
+                    color={color}
+                    index={idx}
+                    onClick={() => router.push(`/event/${event.id}`)}
+                  />
+                )
+              })}
             </div>
-          )
-        })}
-      </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
