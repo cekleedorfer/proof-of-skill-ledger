@@ -4,7 +4,7 @@
     {
       "name": "proof-of-skill",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "out", "-p", "4001", "-s"],
+      "runtimeArgs": ["serve", "out", "-p", "4001", "--single"],
       "port": 4001
     }
   ]

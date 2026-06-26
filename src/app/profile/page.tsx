@@ -5,21 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useProfile, SocialLink } from '@/lib/profile'
 import { useStore } from '@/lib/store'
-import { getEventColor } from '@/lib/colors'
+import { THEMES, getTheme, getThemedColor, getBubbleColor, textColorForBg } from '@/lib/themes'
 import { toast } from 'sonner'
+import { useRef } from 'react'
 import {
   Linkedin, Github, Twitter, Globe, Mail, Instagram,
-  ExternalLink, Pencil, Check, MapPin, X, ChevronRight,
+  ExternalLink, Pencil, Check, MapPin, X, ChevronRight, Camera,
 } from 'lucide-react'
 
-const ACCENT_COLORS = [
-  { label: 'Teal', value: '#0F766E' },
-  { label: 'Coral', value: '#EA580C' },
-  { label: 'Plum', value: '#7C3AED' },
-  { label: 'Ocean', value: '#0369A1' },
-  { label: 'Rose', value: '#BE185D' },
-  { label: 'Forest', value: '#15803D' },
-]
 
 const PLATFORM_META: Record<SocialLink['platform'], { icon: React.ElementType; label: string; placeholder: string; base: string }> = {
   linkedin: { icon: Linkedin, label: 'LinkedIn', placeholder: 'linkedin.com/in/yourname', base: 'https://' },
@@ -41,6 +34,7 @@ export default function ProfilePage() {
   const { events } = useStore()
   const router = useRouter()
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [editingField, setEditingField] = useState<string | null>(null)
   const [editingLink, setEditingLink] = useState<SocialLink['platform'] | null>(null)
   const [tempValues, setTempValues] = useState<Record<string, string>>({})
@@ -48,7 +42,8 @@ export default function ProfilePage() {
 
   const portfolioEvents = events.filter(e => e.visibility === 'portfolio')
   const allIds = events.map(e => e.id)
-  const ac = profile.accentColor
+  const theme = getTheme(profile.themeId)
+  const ac = theme.accent
 
   function startEdit(field: string, current: string) {
     setEditingField(field)
@@ -70,6 +65,14 @@ export default function ProfilePage() {
     updateLink(platform, tempValues[platform]?.trim() ?? '')
     setEditingLink(null)
     toast.success('Link saved')
+  }
+
+  function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => updateProfile({ avatarUrl: reader.result as string })
+    reader.readAsDataURL(file)
   }
 
   function openLink(url: string, base: string) {
@@ -98,12 +101,22 @@ export default function ProfilePage() {
           </button>
         </div>
 
+        {/* Hidden file input */}
+        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+
         {/* Avatar */}
         <div className="flex items-end gap-4 mb-4">
-          <div className="w-20 h-20 rounded-3xl flex items-center justify-center text-2xl font-black shadow-lg border-2 border-white/30"
-            style={{ background: `${ac}99`, color: 'white' }}>
-            {profile.avatarInitials}
-          </div>
+          <button onClick={() => fileInputRef.current?.click()}
+            className="relative w-20 h-20 rounded-3xl shadow-lg border-2 border-white/30 overflow-hidden flex-shrink-0 group"
+            style={{ background: `${ac}99` }}>
+            {profile.avatarUrl
+              ? <img src={profile.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              : <span className="text-2xl font-black text-white w-full h-full flex items-center justify-center">{profile.avatarInitials}</span>
+            }
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 group-active:opacity-100 transition-opacity">
+              <Camera className="w-6 h-6 text-white" />
+            </div>
+          </button>
           <div className="flex-1 pb-1">
             {/* Name */}
             {editingField === 'name' ? (
@@ -192,19 +205,42 @@ export default function ProfilePage() {
                   <button onClick={() => setShowDesign(false)}><X className="w-4 h-4 text-gray-400" /></button>
                 </div>
 
-                {/* Accent color */}
-                <p className="text-xs font-semibold text-gray-500 mb-2">Accent color</p>
-                <div className="flex gap-2 flex-wrap mb-4">
-                  {ACCENT_COLORS.map(c => (
-                    <button key={c.value} onClick={() => { updateProfile({ accentColor: c.value }); toast.success(`${c.label} theme applied`) }}
-                      className="w-9 h-9 rounded-full border-2 transition-all"
-                      style={{ background: c.value, borderColor: profile.accentColor === c.value ? '#111' : 'transparent' }}
-                      title={c.label} />
-                  ))}
+                {/* Theme picker */}
+                <p className="text-xs font-semibold text-gray-500 mb-2">Color theme</p>
+                <div className="grid grid-cols-3 gap-2 mb-4">
+                  {THEMES.map(t => {
+                    const active = profile.themeId === t.id
+                    return (
+                      <button key={t.id}
+                        onClick={() => { updateProfile({ themeId: t.id, accentColor: t.accent }); toast.success(`${t.name} theme applied`) }}
+                        className="rounded-2xl p-2.5 border-2 transition-all text-left"
+                        style={{ borderColor: active ? t.accent : '#E5E7EB', background: active ? `${t.accent}10` : 'transparent' }}>
+                        <div className="flex gap-1 mb-1.5">
+                          {t.colors.slice(0, 4).map((c, i) => (
+                            <div key={i} className="w-4 h-4 rounded-full flex-shrink-0" style={{ background: c.bg }} />
+                          ))}
+                        </div>
+                        <p className="text-[11px] font-bold" style={{ color: active ? t.accent : '#6B7280' }}>{t.name}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+
+                {/* Avatar */}
+                <p className="text-xs font-semibold text-gray-500 mb-2">Profile photo</p>
+                <div className="flex items-center gap-3 mb-4">
+                  <button onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-gray-200 text-gray-600 active:scale-95 transition-transform">
+                    <Camera className="w-3.5 h-3.5" /> Upload photo
+                  </button>
+                  {profile.avatarUrl && (
+                    <button onClick={() => updateProfile({ avatarUrl: '' })}
+                      className="text-xs text-red-400 font-semibold">Remove</button>
+                  )}
                 </div>
 
                 {/* Initials */}
-                <p className="text-xs font-semibold text-gray-500 mb-2">Avatar initials</p>
+                <p className="text-xs font-semibold text-gray-500 mb-2">Avatar initials (shown without photo)</p>
                 <div className="flex items-center gap-2 mb-4">
                   <input value={profile.avatarInitials} maxLength={3}
                     onChange={e => updateProfile({ avatarInitials: e.target.value.toUpperCase() })}
@@ -320,15 +356,17 @@ export default function ProfilePage() {
             <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: ac }}>Featured Projects</p>
             <div className="space-y-3">
               {portfolioEvents.map((event, i) => {
-                const color = getEventColor(allIds.indexOf(event.id))
+                const idx = allIds.indexOf(event.id)
+                const color = getThemedColor(theme, idx)
+                const bubbleColor = getBubbleColor(theme, idx, event.significance)
                 return (
                   <motion.div key={event.id}
                     initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                     onClick={() => router.push(`/event/${event.id}`)}
                     className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer active:scale-[0.99] transition-transform">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center text-white font-black text-sm"
-                        style={{ background: color.bg }}>
+                      <div className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center font-black text-sm"
+                        style={{ background: bubbleColor, color: textColorForBg(bubbleColor) }}>
                         {event.significance}★
                       </div>
                       <div className="flex-1 min-w-0">

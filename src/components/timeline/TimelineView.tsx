@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Event } from '@/types'
-import { getEventColor } from '@/lib/colors'
+import { useProfile } from '@/lib/profile'
+import { getTheme, getThemedColor, getBubbleColor } from '@/lib/themes'
 
 interface TimelineViewProps { events: Event[] }
 
@@ -60,6 +61,8 @@ function groupByYear(events: Event[]) {
 
 export function TimelineView({ events }: TimelineViewProps) {
   const router = useRouter()
+  const { profile } = useProfile()
+  const theme = getTheme(profile.themeId)
 
   if (events.length === 0) {
     return (
@@ -89,7 +92,9 @@ export function TimelineView({ events }: TimelineViewProps) {
               <div className="space-y-2">
                 {sorted.map((event, i) => {
                   const idx = globalIndex++
-                  const color = getEventColor(allIds.indexOf(event.id))
+                  const colorIdx = allIds.indexOf(event.id)
+                  const color = getThemedColor(theme, colorIdx)
+                  const bubbleColor = getBubbleColor(theme, colorIdx, event.significance)
                   const size = SIZE[event.significance]
                   const isLeft = i % 2 === 0
                   const floatDuration = 3.4 + (idx % 4) * 0.5
@@ -112,17 +117,18 @@ export function TimelineView({ events }: TimelineViewProps) {
                           animate={{ y: [0, -7, 0] }}
                           transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
                         >
-                          <div className="absolute rounded-full pointer-events-none" style={{ width: size + 28, height: size + 28, background: `radial-gradient(circle, ${color.bg}28 0%, transparent 70%)`, filter: 'blur(10px)', top: -14, left: -14 }} />
+                          <div className="absolute rounded-full pointer-events-none" style={{ width: size + 28, height: size + 28, background: `radial-gradient(circle, ${bubbleColor}28 0%, transparent 70%)`, filter: 'blur(10px)', top: -14, left: -14 }} />
                           <div className="relative cursor-pointer" onClick={() => router.push(`/event/${event.id}`)}>
-                            <ProgressRing size={size} count={event.subEvents.length} color={color.bg} />
+                            <ProgressRing size={size} count={event.subEvents.length} color={bubbleColor} />
                             <motion.div
                               whileTap={{ scale: 0.91 }} whileHover={{ scale: 1.06 }}
                               transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-                              className="relative rounded-full flex items-center justify-center text-white font-semibold text-center overflow-hidden"
+                              className="relative rounded-full flex items-center justify-center font-semibold text-center overflow-hidden"
                               style={{
                                 width: size, height: size,
-                                background: `radial-gradient(circle at 35% 28%, ${lighten(color.bg)}, ${color.bg} 68%)`,
-                                boxShadow: `0 10px 36px ${color.bg}75, 0 3px 10px ${color.bg}45, inset 0 1px 0 rgba(255,255,255,0.28)`,
+                                color: color.text,
+                                background: `radial-gradient(circle at 35% 28%, ${lighten(bubbleColor)}, ${bubbleColor} 68%)`,
+                                boxShadow: `0 10px 36px ${bubbleColor}75, 0 3px 10px ${bubbleColor}45, inset 0 1px 0 rgba(255,255,255,0.28)`,
                                 fontSize: fs, lineHeight: 1.25, padding: '14px',
                               }}
                             >
@@ -135,7 +141,7 @@ export function TimelineView({ events }: TimelineViewProps) {
                             {event.subEvents.length > 0 && (
                               <div className="flex gap-0.5">
                                 {Array.from({ length: Math.min(event.subEvents.length, 5) }).map((_, di) => (
-                                  <motion.div key={di} className="w-1 h-1 rounded-full" style={{ background: color.bg, opacity: 0.55 }}
+                                  <motion.div key={di} className="w-1 h-1 rounded-full" style={{ background: bubbleColor, opacity: 0.55 }}
                                     animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, delay: di * 0.3, repeat: Infinity }} />
                                 ))}
                               </div>
@@ -146,7 +152,7 @@ export function TimelineView({ events }: TimelineViewProps) {
 
                       <div className="flex-shrink-0 flex flex-col items-center z-10">
                         <motion.div className="w-3 h-3 rounded-full border-2 border-white shadow-md"
-                          style={{ background: color.bg, boxShadow: `0 0 8px ${color.bg}80` }}
+                          style={{ background: bubbleColor, boxShadow: `0 0 8px ${bubbleColor}80` }}
                           animate={{ scale: [1, 1.2, 1] }} transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity }} />
                       </div>
 

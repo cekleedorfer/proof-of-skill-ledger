@@ -1,13 +1,16 @@
 'use client'
 
+import { useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { Plus, Sparkles, Lock, BookOpen } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Plus, Sparkles, Lock, BookOpen, Camera, X, ImageIcon } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Switch } from '@/components/ui/switch'
 import { Event } from '@/types'
 import { useStore } from '@/lib/store'
-import { getEventColor } from '@/lib/colors'
+import { useProfile } from '@/lib/profile'
+import { getTheme, getBubbleColor, textColorForBg } from '@/lib/themes'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 interface EventTabsProps { event: Event; eventColor: string; eventLightColor: string; allIds: string[] }
@@ -31,14 +34,14 @@ function bubbleFontSize(title: string, size: number): number {
   return Math.min(8.5, base * 0.72)
 }
 
-function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: string[]; onSubClick: (subId: string) => void }) {
+function OrbitalLayout({ event, allIds, onSubClick, theme }: { event: Event; allIds: string[]; onSubClick: (subId: string) => void; theme: ReturnType<typeof getTheme> }) {
   const subs = event.subEvents
-  const centerColor = getEventColor(allIds.indexOf(event.id)).bg
+  const eventIdx = allIds.indexOf(event.id)
+  const centerColor = getBubbleColor(theme, eventIdx, event.significance)
   const positions = [
     { x: -140, y: -70 }, { x: 125, y: -80 }, { x: -148, y: 62 },
     { x: 132, y: 68 }, { x: -18, y: -138 }, { x: 14, y: 128 },
   ]
-  const subColors = ['#EA580C', '#0F766E', '#BE185D', '#0369A1', '#15803D', '#B45309']
 
   return (
     <div className="relative flex items-center justify-center" style={{ height: 320 }}>
@@ -46,7 +49,7 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
       <div className="absolute rounded-full border opacity-10" style={{ width: 170, height: 170, borderColor: centerColor }} />
       {subs.map((sub, i) => {
         const pos = positions[i % positions.length]
-        const subColor = subColors[i % subColors.length]
+        const subColor = getBubbleColor(theme, eventIdx, sub.significance)
         const sizeMap: Record<number, number> = { 1: 60, 2: 76, 3: 94, 4: 108, 5: 124 }
         const size = sizeMap[sub.significance] ?? 76
         const fs = bubbleFontSize(sub.title, size)
@@ -56,9 +59,10 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
             transition={{ delay: 0.1 + i * 0.08, type: 'spring', stiffness: 300, damping: 22 }}
             whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.06 }}
             onClick={() => onSubClick(sub.id)}
-            className="absolute rounded-full flex items-center justify-center text-white font-semibold text-center leading-tight cursor-pointer overflow-hidden"
+            className="absolute rounded-full flex items-center justify-center font-semibold text-center leading-tight cursor-pointer overflow-hidden"
             style={{
               width: size, height: size,
+              color: textColorForBg(subColor),
               background: `radial-gradient(circle at 35% 30%, ${lightenHex(subColor)}, ${subColor} 70%)`,
               boxShadow: `0 8px 28px ${subColor}70, 0 2px 8px ${subColor}40, inset 0 1px 0 rgba(255,255,255,0.25)`,
               top: '50%', left: '50%',
@@ -74,9 +78,10 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-        className="relative z-10 rounded-full flex items-center justify-center text-white font-bold text-center leading-tight overflow-hidden"
+        className="relative z-10 rounded-full flex items-center justify-center font-bold text-center leading-tight overflow-hidden"
         style={{
           width: 130, height: 130,
+          color: textColorForBg(centerColor),
           background: `radial-gradient(circle at 35% 30%, ${lightenHex(centerColor)}, ${centerColor} 65%)`,
           boxShadow: `0 12px 40px ${centerColor}80, 0 4px 12px ${centerColor}50, inset 0 1px 0 rgba(255,255,255,0.3)`,
           fontSize: bubbleFontSize(event.title, 130), padding: 16,
@@ -91,18 +96,58 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
 
 export function EventTabs({ event, eventColor, eventLightColor, allIds }: EventTabsProps) {
   const router = useRouter()
-  const { toggleVisibility } = useStore()
+  const { toggleVisibility, addEventPhoto, removeEventPhoto } = useStore()
+  const { profile } = useProfile()
+  const theme = getTheme(profile.themeId)
+  const photoInputRef = useRef<HTMLInputElement>(null)
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null)
+
+  function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    files.forEach(file => {
+      const reader = new FileReader()
+      reader.onload = () => addEventPhoto(event.id, reader.result as string)
+      reader.readAsDataURL(file)
+    })
+    e.target.value = ''
+  }
+
+  const photos = event.photos ?? []
 
   return (
     <Tabs defaultValue="subevents" className="w-full">
+      {/* hidden multi-file input */}
+      <input ref={photoInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
+
       <TabsList className="w-full bg-white border border-gray-100 rounded-2xl p-1 mb-4 shadow-sm h-auto">
-        {['overview', 'subevents', 'notes', 'ai'].map((v, i) => (
-          <TabsTrigger key={v} value={v} className="flex-1 rounded-xl text-[11px] font-semibold py-2 data-[state=active]:text-white data-[state=inactive]:text-gray-400">
-            {['Overview', 'Sub-events', 'Notes', 'AI Story'][i]}
+        {['overview', 'subevents', 'photos', 'ai'].map((v, i) => (
+          <TabsTrigger key={v} value={v} className="flex-1 rounded-xl text-[11px] font-semibold py-2 data-[state=active]:text-white data-[state=inactive]:text-gray-400 relative">
+            {['Overview', 'Sub-events', 'Photos', 'AI Story'][i]}
+            {v === 'photos' && photos.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white" style={{ background: eventColor }}>{photos.length}</span>
+            )}
           </TabsTrigger>
         ))}
       </TabsList>
       <style>{`[data-state="active"][role="tab"] { background: ${eventColor} !important; color: white !important; }`}</style>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {lightboxIdx !== null && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setLightboxIdx(null)}>
+            <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+              <X className="w-5 h-5" />
+            </button>
+            <img src={photos[lightboxIdx]} alt="" className="max-w-full max-h-full object-contain rounded-2xl" onClick={e => e.stopPropagation()} />
+            <button className="absolute bottom-6 right-6 bg-red-500/80 text-white text-xs font-semibold px-4 py-2 rounded-full"
+              onClick={e => { e.stopPropagation(); removeEventPhoto(event.id, lightboxIdx); setLightboxIdx(null) }}>
+              Delete photo
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <TabsContent value="overview" className="space-y-3 mt-0">
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
@@ -145,7 +190,7 @@ export function EventTabs({ event, eventColor, eventLightColor, allIds }: EventT
         {event.subEvents.length === 0 ? (
           <div className="text-center py-12"><div className="text-4xl mb-3">🌱</div><p className="text-sm text-gray-400">No sub-events yet.</p></div>
         ) : (
-          <OrbitalLayout event={event} allIds={allIds} onSubClick={(subId) => router.push(`/event/${event.id}/sub/${subId}`)} />
+          <OrbitalLayout event={event} allIds={allIds} theme={theme} onSubClick={(subId) => router.push(`/event/${event.id}/sub/${subId}`)} />
         )}
         <motion.button whileTap={{ scale: 0.97 }} onClick={() => router.push(`/event/${event.id}/add-sub`)}
           className="w-full text-white rounded-2xl py-3.5 font-semibold text-sm flex items-center justify-center gap-2 shadow-md mt-4"
@@ -154,11 +199,41 @@ export function EventTabs({ event, eventColor, eventLightColor, allIds }: EventT
         </motion.button>
       </TabsContent>
 
-      <TabsContent value="notes" className="mt-0">
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-h-[200px]">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Reflection Notes</p>
-          <p className="text-sm text-gray-300 italic">Your private notes and reflections will live here.</p>
-        </div>
+      <TabsContent value="photos" className="mt-0">
+        {photos.length === 0 ? (
+          <motion.button whileTap={{ scale: 0.97 }} onClick={() => photoInputRef.current?.click()}
+            className="w-full border-2 border-dashed rounded-2xl py-14 flex flex-col items-center gap-3 transition-colors"
+            style={{ borderColor: `${eventColor}55` }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: eventLightColor }}>
+              <Camera className="w-6 h-6" style={{ color: eventColor }} />
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold text-gray-700">Add photos</p>
+              <p className="text-xs text-gray-400 mt-0.5">Tap to upload from your camera roll</p>
+            </div>
+          </motion.button>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {photos.map((src, i) => (
+                <motion.button key={i} initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.05 }}
+                  onClick={() => setLightboxIdx(i)}
+                  className="aspect-square rounded-2xl overflow-hidden bg-gray-100 active:scale-95 transition-transform">
+                  <img src={src} alt="" className="w-full h-full object-cover" />
+                </motion.button>
+              ))}
+              {/* Add more tile */}
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => photoInputRef.current?.click()}
+                className="aspect-square rounded-2xl flex flex-col items-center justify-center gap-1 border-2 border-dashed transition-colors"
+                style={{ borderColor: `${eventColor}55` }}>
+                <ImageIcon className="w-5 h-5" style={{ color: eventColor }} />
+                <span className="text-[10px] font-semibold" style={{ color: eventColor }}>Add more</span>
+              </motion.button>
+            </div>
+            <p className="text-[10px] text-gray-400 text-center">Tap a photo to view · tap delete to remove</p>
+          </>
+        )}
       </TabsContent>
 
       <TabsContent value="ai" className="mt-0">

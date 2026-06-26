@@ -14,6 +14,8 @@ export interface ProfileData {
   location: string
   accentColor: string
   avatarInitials: string
+  avatarUrl: string
+  themeId: string
   links: SocialLink[]
 }
 
@@ -24,6 +26,8 @@ const DEFAULT_PROFILE: ProfileData = {
   location: 'Boston, MA',
   accentColor: '#0F766E',
   avatarInitials: 'CK',
+  avatarUrl: '',
+  themeId: 'tidal',
   links: [
     { platform: 'linkedin', url: '' },
     { platform: 'github', url: '' },

@@ -5,14 +5,17 @@ import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Calendar, Star } from 'lucide-react'
 import { useStore } from '@/lib/store'
+import { useProfile } from '@/lib/profile'
 import { PageShell } from '@/components/layout/PageShell'
 import { EventTabs } from '@/components/event/EventTabs'
-import { getEventColor } from '@/lib/colors'
+import { getTheme, getThemedColor, getBubbleColor } from '@/lib/themes'
 
 export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const { events } = useStore()
   const router = useRouter()
+  const { profile } = useProfile()
+  const theme = getTheme(profile.themeId)
   const event = events.find(e => e.id === id)
   const allIds = events.map(e => e.id)
 
@@ -26,7 +29,9 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
     )
   }
 
-  const color = getEventColor(allIds.indexOf(id))
+  const colorIdx = allIds.indexOf(id)
+  const bubbleColor = getBubbleColor(theme, colorIdx, event.significance)
+  const color = { bg: bubbleColor, light: getThemedColor(theme, colorIdx).light }
 
   return (
     <div className="min-h-dvh pb-32 bg-[#f5f5f7]">

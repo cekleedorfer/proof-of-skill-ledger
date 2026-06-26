@@ -27,4 +27,5 @@ export interface Event {
   skills: string[]
   subEvents: SubEvent[]
   aiSummary: string
+  photos: string[]
 }

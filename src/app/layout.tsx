@@ -3,6 +3,7 @@ import './globals.css'
 import { StoreProvider } from '@/lib/store'
 import { ProfileProvider } from '@/lib/profile'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { AppWrapper } from '@/components/layout/AppWrapper'
 import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
@@ -14,15 +15,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <div className="app-container">
-          <StoreProvider>
-            <ProfileProvider>
+        <StoreProvider>
+          <ProfileProvider>
+            <AppWrapper>
               {children}
               <BottomNav />
               <Toaster position="top-center" richColors />
-            </ProfileProvider>
-          </StoreProvider>
-        </div>
+            </AppWrapper>
+          </ProfileProvider>
+        </StoreProvider>
       </body>
     </html>
   )

@@ -11,6 +11,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Adaptability', 'Self-Reliance', 'Academic Focus'],
     aiSummary: 'This milestone marks a turning point where independence and academic drive converged. Relocating alone and building community from scratch demonstrates resilience — a quality that shows up again and again in your story.',
+    photos: [],
     subEvents: [
       { id: 'e1-s1', parentEventId: 'e1', title: 'Move-In Day', date: '2022-08-28', description: 'Moved into Walsh Hall with two strangers. Helped a girl carry her boxes and ended up making my first friend.', whatHappened: 'Unpacked alone for the first time. FaceTimed my family crying and then went to dinner with my floor.', skillGrowth: 'Courage to start over', significance: 3, skillTags: ['Adaptability', 'Bravery'], aiSummary: 'That box-carrying moment was a preview of how you build relationships — through small, unremarkable acts of kindness.' },
       { id: 'e1-s2', parentEventId: 'e1', title: 'First Exam A', date: '2022-10-05', description: 'Got an A on my first college exam. Couldn\'t believe it — I had genuinely studied harder than I ever had in high school.', whatHappened: 'Studied in the library for 8 hours straight. Felt prepared for the first time.', skillGrowth: 'Academic rigor and discipline', significance: 3, skillTags: ['Focus', 'Work Ethic'], aiSummary: 'This was the moment you learned that effort at this level actually pays off. The discipline you built here shows up in everything that follows.' },
@@ -28,6 +29,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Financial Modeling', 'Data Analysis', 'Presentation', 'Attention to Detail'],
     aiSummary: 'Most interns spend summers shadowing. You spent yours finding errors senior analysts missed and standing in front of VPs explaining them. The return offer wasn\'t a courtesy — it was earned.',
+    photos: [],
     subEvents: [
       { id: 'e2-s1', parentEventId: 'e2', title: 'Week 1 Model', date: '2023-06-12', description: 'Assigned my first real DCF model on day 3. Stayed until 9pm both nights to get it right.', whatHappened: 'My manager said it was "the cleanest first model she\'d seen from an intern."', skillGrowth: 'Financial modeling under pressure', significance: 3, skillTags: ['Technical', 'Diligence'], aiSummary: 'Day 3. A real model. You didn\'t wait to feel ready — you just built it.' },
       { id: 'e2-s2', parentEventId: 'e2', title: '$40K Error Found', date: '2023-07-19', description: 'Noticed a formula error in a legacy spreadsheet that had been miscalculating a client\'s fee exposure for 6 months. Total discrepancy: $40,200.', whatHappened: 'Flagged it to my manager quietly. She looped in the VP. Client was notified and credited.', skillGrowth: 'Precision, ethical judgment, professional courage', significance: 5, skillTags: ['Integrity', 'Attention to Detail', 'Impact'], aiSummary: 'You found something three senior analysts had missed — and your first instinct was to fix it, not ignore it. That\'s character.' },
@@ -45,6 +47,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Product Thinking', 'Teamwork', 'Public Speaking', 'Problem Solving'],
     aiSummary: 'Twenty-eight hours. No sleep. A product built for people like the ones you grew up with. And you won. This story doesn\'t just show skill — it shows what problems you choose to solve.',
+    photos: [],
     subEvents: [
       { id: 'e3-s1', parentEventId: 'e3', title: 'Pitch Idea', date: '2023-03-25', description: 'Proposed the financial literacy angle to my team at midnight when we were going in circles. Everyone immediately said yes.', whatHappened: 'I\'d been thinking about how my family navigated college finances without guidance. It felt personal.', skillGrowth: 'Vision, leadership under ambiguity', significance: 3, skillTags: ['Initiative', 'Empathy'], aiSummary: 'The best ideas often come from lived experience. Yours did.' },
       { id: 'e3-s2', parentEventId: 'e3', title: 'Prototype Built', date: '2023-03-26', description: 'Built a working Figma prototype and basic web front-end in under 18 hours with no sleep.', whatHappened: 'Split tasks at 2am. I owned the pitch deck and the financial content architecture.', skillGrowth: 'Execution speed, cross-functional teamwork', significance: 4, skillTags: ['Execution', 'Collaboration'], aiSummary: 'Building something real in 18 hours requires the kind of focus most people can\'t summon in 18 days.' },
@@ -61,6 +64,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Python', 'Web Scraping', 'Data Visualization', 'Self-Teaching'],
     aiSummary: 'Nobody assigned this. No grade was attached. You just wanted to build something useful — and you did. Self-directed learning is one of the rarest signals on a résumé.',
+    photos: [],
     subEvents: [
       { id: 'e4-s1', parentEventId: 'e4', title: 'First Script Worked', date: '2023-07-14', description: 'Got my first Python script to actually run without errors. It printed 10 stock tickers from Reddit r/wallstreetbets. I screenshotted it.', whatHappened: 'It took 3 days to get pandas installed correctly. But when it worked, I felt genuinely powerful.', skillGrowth: 'Technical persistence, debugging', significance: 2, skillTags: ['Technical', 'Persistence'], aiSummary: 'The first time code works is something you don\'t forget. You kept going after that.' },
       { id: 'e4-s2', parentEventId: 'e4', title: 'Sentiment Model', date: '2023-08-20', description: 'Added a basic NLP sentiment layer using VADER. The tool could now classify each post as bullish, bearish, or neutral.', whatHappened: 'Spent 2 weekends reading documentation. Broke it twice and fixed it both times.', skillGrowth: 'NLP basics, independent problem solving', significance: 3, skillTags: ['Technical', 'Curiosity'], aiSummary: 'Reading docs on a Saturday because you want to — that\'s how real skills are built.' },
@@ -77,6 +81,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Community Building', 'Advocacy', 'Project Management', 'Communication'],
     aiSummary: 'You built something that didn\'t exist because you saw a need and refused to wait for someone else to fill it. Six hundred people signed up because they trusted you with something vulnerable.',
+    photos: [],
     subEvents: [
       { id: 'e5-s1', parentEventId: 'e5', title: 'First Event: 80 Attendees', date: '2023-04-07', description: 'Our first panel on student burnout had 80 attendees — 3x what we hoped for. We ran out of chairs.', whatHappened: 'Set up at 7am for an 8pm event. When I saw the line outside, I had to step into the hallway to collect myself.', skillGrowth: 'Event execution, emotional leadership', significance: 4, skillTags: ['Leadership', 'Community'], aiSummary: 'You built something that mattered so much, people gave up a weeknight for it.' },
       { id: 'e5-s2', parentEventId: 'e5', title: 'BC Partnership', date: '2023-04-21', description: 'BC Counseling Services reached out to officially partner with our campaign. They offered to co-brand our final event.', whatHappened: 'A counselor emailed me saying she\'d heard students talking about us. She wanted to collaborate.', skillGrowth: 'Institutional credibility, relationship building', significance: 3, skillTags: ['Influence', 'Advocacy'], aiSummary: 'When an institution reaches out to you — a student — to ask for collaboration, you\'ve built something real.' },
@@ -93,6 +98,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Public Speaking', 'Storytelling', 'Vulnerability', 'Thought Leadership'],
     aiSummary: 'You stood in front of 400 people and told the truth. Not a polished, professional truth — your truth. That\'s harder than any presentation you\'ll ever give in a boardroom.',
+    photos: [],
     subEvents: [
       { id: 'e6-s1', parentEventId: 'e6', title: 'Application Accepted', date: '2023-11-01', description: 'Applied on a whim after seeing the call for speakers. Got accepted 3 weeks later with a callback saying my pitch was "exactly the kind of story we\'re looking for."', whatHappened: 'I refreshed my email so often my roommate told me to put my phone down.', skillGrowth: 'Taking creative risks', significance: 2, skillTags: ['Courage', 'Initiative'], aiSummary: 'The whim that became a stage. You almost didn\'t apply.' },
       { id: 'e6-s2', parentEventId: 'e6', title: '6 Weeks of Prep', date: '2024-01-15', description: 'Rehearsed 3x a week for 6 weeks. Cut the talk from 22 minutes to 12. Memorized every transition.', whatHappened: 'Ran it for my roommates at midnight. My friend cried during the last section.', skillGrowth: 'Oratory craft, discipline', significance: 3, skillTags: ['Preparation', 'Discipline'], aiSummary: 'Six weeks of rehearsal is what separates a talk from a performance.' },
@@ -109,6 +115,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Academic Excellence', 'Time Management', 'Discipline'],
     aiSummary: 'Three semesters. A trend is not an accident. You have built a sustained practice of academic excellence while running campaigns, doing internships, and giving TEDx talks.',
+    photos: [],
     subEvents: [
       { id: 'e7-s1', parentEventId: 'e7', title: '3.91 GPA', date: '2024-01-10', description: 'Highest GPA yet, despite the hardest courseload so far (Econometrics, Corporate Finance II, Stats seminar).', whatHappened: 'Balanced studying with TEDx prep during finals. Barely slept the last week.', skillGrowth: 'Sustained excellence, juggling high-stakes demands', significance: 4, skillTags: ['Achievement', 'Discipline'], aiSummary: 'The hardest semester yet, with the best grades yet. That\'s the pattern of someone who rises to challenges.' },
       { id: 'e7-s2', parentEventId: 'e7', title: 'Tutor Program', date: '2023-10-20', description: 'Started as a peer tutor for Intro to Finance after a professor recommended me. Tutored 12 students that semester.', whatHappened: 'A student I tutored got a B+ after failing the midterm. She brought me a thank you card.', skillGrowth: 'Teaching, generosity, communication', significance: 2, skillTags: ['Mentorship', 'Communication'], aiSummary: 'Tutoring gave back what school gave you. That reciprocity matters.' },
@@ -124,6 +131,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Writing', 'Advocacy', 'Research', 'Voice'],
     aiSummary: 'Most-read op-ed that month. You put your name on a perspective that challenged your own institution — and thousands of people read it.',
+    photos: [],
     subEvents: [
       { id: 'e8-s1', parentEventId: 'e8', title: 'Piece Published', date: '2024-03-14', description: 'Submitted after 3 drafts over two weeks. The editor called it "one of the strongest submissions we\'ve received this year."', whatHappened: 'Wrote the first draft in one sitting the night my internship was confirmed. Felt urgent.', skillGrowth: 'Persuasive writing, editorial process', significance: 3, skillTags: ['Writing', 'Authenticity'], aiSummary: 'The first draft written in urgency is often the most honest one. You refined it — but kept the fire.' },
       { id: 'e8-s2', parentEventId: 'e8', title: '3,200 Views', date: '2024-03-20', description: 'The piece was shared in three external newsletters including a first-gen college student network with 18K subscribers.', whatHappened: 'A professor I\'d never met emailed me to say she was assigning it in her seminar.', skillGrowth: 'Thought leadership, real-world impact', significance: 4, skillTags: ['Influence', 'Impact'], aiSummary: 'When a professor assigns your work — you\'ve crossed from student to contributor.' },
@@ -139,6 +147,7 @@ export const seedEvents: Event[] = [
     visibility: 'private',
     skills: ['Mentorship', 'Organization', 'Teaching'],
     aiSummary: 'Small-scale leadership. You saw people struggling and built a system to help them. That impulse shows up everywhere.',
+    photos: [],
     subEvents: [
       { id: 'e9-s1', parentEventId: 'e9', title: 'Pre-Finals Session', date: '2023-12-10', description: 'Ran a 3-hour review session the night before the final. 14 people showed up. 11 told me afterward it was the most helpful thing they did to prepare.', whatHappened: 'I made a custom practice exam with problems I expected to see. Three showed up on the real test.', skillGrowth: 'Instructional design, leadership', significance: 2, skillTags: ['Mentorship', 'Teaching'], aiSummary: 'You built the resource you wished you\'d had.' },
     ],
@@ -153,6 +162,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Grit', 'Physical Discipline', 'Long-term Planning', 'Mental Toughness'],
     aiSummary: 'Every mile of that marathon was earned during a 5 AM run when no one was watching. This isn\'t just a physical achievement — it\'s proof that you do hard things even when they\'re optional.',
+    photos: [],
     subEvents: [
       { id: 'e10-s1', parentEventId: 'e10', title: 'First 10-Mile Run', date: '2024-01-20', description: 'Hit 10 miles for the first time on a cold January morning. Cried at mile 8. Finished anyway.', whatHappened: 'My legs gave out at mile 7. I sat on the curb for 4 minutes and kept going.', skillGrowth: 'Mental endurance, self-trust', significance: 3, skillTags: ['Grit', 'Resilience'], aiSummary: 'The curb at mile 7. You sat down. Then you got up. That\'s the whole story.' },
       { id: 'e10-s2', parentEventId: 'e10', title: '20-Mile Long Run', date: '2024-03-09', description: 'Completed my peak training run — 20 miles on a freezing Saturday morning. Finished in 3h44m.', whatHappened: 'Listened to the same playlist 3 times. Thought about my TEDx talk the whole way.', skillGrowth: 'Physical peak preparation, mental focus', significance: 4, skillTags: ['Discipline', 'Focus'], aiSummary: 'At mile 17, you were still thinking about the work. That\'s who you are.' },
@@ -170,6 +180,7 @@ export const seedEvents: Event[] = [
     visibility: 'private',
     skills: ['Vulnerability', 'Emotional Intelligence', 'Forgiveness', 'Communication'],
     aiSummary: 'This was not a career milestone. It was harder than any of those. You chose the discomfort of honesty over the comfort of distance — and you got your sister back.',
+    photos: [],
     subEvents: [
       { id: 'e11-s1', parentEventId: 'e11', title: 'The Conversation', date: '2023-12-26', description: 'We sat in the kitchen for 3 hours. Both of us cried. Neither of us left.', whatHappened: 'I went first. I said the thing I\'d been avoiding for two years. She said she\'d been waiting for me to say it.', skillGrowth: 'Vulnerability, courage in relationships', significance: 5, skillTags: ['Vulnerability', 'Courage'], aiSummary: 'She had been waiting. You didn\'t know that until you went first.' },
       { id: 'e11-s2', parentEventId: 'e11', title: 'Two Months Later', date: '2024-02-18', description: 'She came to my TEDx talk. Sat in the front row. Flew in from Pittsburgh without telling me.', whatHappened: 'I saw her face in the crowd during my opening line. I almost forgot the whole speech.', skillGrowth: 'Repair, showing up for each other', significance: 4, skillTags: ['Relationship', 'Love'], aiSummary: 'She flew to Boston to sit in the front row. Some things don\'t need a caption.' },
@@ -185,6 +196,7 @@ export const seedEvents: Event[] = [
     visibility: 'private',
     skills: ['Creative Learning', 'Patience', 'Persistence'],
     aiSummary: 'This one isn\'t on a résumé. That\'s exactly why it matters — you made space for something purely yours.',
+    photos: [],
     subEvents: [
       { id: 'e12-s1', parentEventId: 'e12', title: 'First Full Song', date: '2023-07-12', description: 'Played "Blackbird" by The Beatles all the way through for the first time. My fingertips were raw. I played it four more times.', whatHappened: 'My roommate knocked on my door because she could hear it through the wall. She asked me to play it again.', skillGrowth: 'Creative persistence, self-teaching', significance: 2, skillTags: ['Creativity', 'Joy'], aiSummary: 'Fingertips raw, played it four more times. That\'s what loving something feels like.' },
     ],
@@ -199,6 +211,7 @@ export const seedEvents: Event[] = [
     visibility: 'portfolio',
     skills: ['Independence', 'Cultural Curiosity', 'Navigation', 'Self-Trust'],
     aiSummary: 'You planned it. You went alone. You navigated a foreign country with no backup plan and got to know yourself better in ten days than most people do in a year.',
+    photos: [],
     subEvents: [
       { id: 'e13-s1', parentEventId: 'e13', title: 'Arrived in Lisbon', date: '2024-05-28', description: 'Landed alone, no hotel confirmation email (it went to spam), navigated the metro with Google Translate and the kindness of a woman who saw my panic.', whatHappened: 'A stranger in the metro station helped me when she saw me looking at my phone confused. She walked me to the right line.', skillGrowth: 'Adaptability, trust in strangers', significance: 2, skillTags: ['Adaptability', 'Courage'], aiSummary: 'When the plan failed, a stranger helped. You\'ve learned to let people in.' },
       { id: 'e13-s2', parentEventId: 'e13', title: 'Fado at Midnight', date: '2024-06-02', description: 'Found a small fado bar in Alfama at midnight by following the sound. Sat alone for two hours. Cried during a song I didn\'t understand.', whatHappened: 'A man at the next table saw me crying and handed me a napkin with a little drawing of a boat on it.', skillGrowth: 'Presence, emotional openness, cultural immersion', significance: 3, skillTags: ['Presence', 'Joy'], aiSummary: 'You cried at music you didn\'t understand. Some things reach you past language.' },
@@ -215,6 +228,7 @@ export const seedEvents: Event[] = [
     visibility: 'private',
     skills: ['Self-Reflection', 'Consistency', 'Emotional Clarity'],
     aiSummary: 'You chose to start your days with yourself. 100 times in a row. That kind of quiet consistency is the foundation everything else is built on.',
+    photos: [],
     subEvents: [
       { id: 'e14-s1', parentEventId: 'e14', title: 'Day 100', date: '2024-04-10', description: 'Hit day 100 the morning of the week before the marathon. Wrote about being afraid and doing things anyway.', whatHappened: 'Reread my day 1 entry. I barely recognized the version of myself who wrote it.', skillGrowth: 'Self-awareness, longitudinal self-knowledge', significance: 3, skillTags: ['Growth', 'Reflection'], aiSummary: 'You barely recognized who you were on day 1. That\'s what 100 days of honesty with yourself will do.' },
     ],

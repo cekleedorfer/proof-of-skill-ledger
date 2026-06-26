@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
+import { useProfile } from '@/lib/profile'
+import { getTheme } from '@/lib/themes'
 import { TimelineView } from '@/components/timeline/TimelineView'
 
 type Filter = 'all' | 'professional' | 'personal' | 'portfolio'
@@ -18,6 +20,8 @@ const FILTERS: { key: Filter; label: string }[] = [
 export default function Home() {
   const { events } = useStore()
   const router = useRouter()
+  const { profile } = useProfile()
+  const theme = getTheme(profile.themeId)
   const [filter, setFilter] = useState<Filter>('all')
 
   const filtered = events.filter(e => {
@@ -31,7 +35,7 @@ export default function Home() {
   const topSkills = [...new Set(events.flatMap(e => e.skills))].slice(0, 3)
 
   return (
-    <div className="min-h-dvh pb-32 relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #f0fdfa 0%, #fff7ed 50%, #f0fdf4 100%)' }}>
+    <div className="min-h-dvh pb-32 relative overflow-hidden" style={{ background: theme.bgGradient }}>
       <div className="absolute top-[-80px] left-[-60px] w-64 h-64 rounded-full opacity-30 pointer-events-none" style={{ background: 'radial-gradient(circle, #0d9488 0%, transparent 70%)', filter: 'blur(48px)' }} />
       <div className="absolute top-[120px] right-[-80px] w-72 h-72 rounded-full opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, #fb923c 0%, transparent 70%)', filter: 'blur(56px)' }} />
       <div className="absolute top-[420px] left-[-40px] w-56 h-56 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #4ade80 0%, transparent 70%)', filter: 'blur(40px)' }} />

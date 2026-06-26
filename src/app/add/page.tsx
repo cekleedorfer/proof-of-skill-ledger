@@ -71,6 +71,7 @@ export default function AddPage() {
       skills: skills.split(',').map(s => s.trim()).filter(Boolean),
       aiSummary: `This event reflects ${title.trim()} — a moment of real significance in your story.`,
       subEvents: [],
+      photos: [],
     })
     toast.success('Event added to your ledger ✦')
     router.push('/')

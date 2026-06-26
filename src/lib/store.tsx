@@ -9,6 +9,8 @@ interface StoreContextType {
   addEvent: (event: Event) => void
   addSubEvent: (eventId: string, subEvent: SubEvent) => void
   toggleVisibility: (eventId: string) => void
+  addEventPhoto: (eventId: string, dataUrl: string) => void
+  removeEventPhoto: (eventId: string, index: number) => void
 }
 
 const StoreContext = createContext<StoreContextType | null>(null)
@@ -38,8 +40,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     )
   }
 
+  function addEventPhoto(eventId: string, dataUrl: string) {
+    setEvents(prev =>
+      prev.map(e =>
+        e.id === eventId ? { ...e, photos: [...(e.photos ?? []), dataUrl] } : e
+      )
+    )
+  }
+
+  function removeEventPhoto(eventId: string, index: number) {
+    setEvents(prev =>
+      prev.map(e =>
+        e.id === eventId
+          ? { ...e, photos: e.photos.filter((_, i) => i !== index) }
+          : e
+      )
+    )
+  }
+
   return (
-    <StoreContext.Provider value={{ events, addEvent, addSubEvent, toggleVisibility }}>
+    <StoreContext.Provider value={{ events, addEvent, addSubEvent, toggleVisibility, addEventPhoto, removeEventPhoto }}>
       {children}
     </StoreContext.Provider>
   )

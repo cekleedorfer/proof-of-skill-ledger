@@ -3,13 +3,16 @@
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { useStore } from '@/lib/store'
-import { getEventColor } from '@/lib/colors'
+import { useProfile } from '@/lib/profile'
+import { getTheme, getThemedColor, getBubbleColor, textColorForBg } from '@/lib/themes'
 import { BookOpen, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function PortfolioPage() {
   const { events } = useStore()
   const router = useRouter()
+  const { profile } = useProfile()
+  const theme = getTheme(profile.themeId)
   const allIds = events.map(e => e.id)
   const portfolio = events.filter(e => e.visibility === 'portfolio')
   const professional = portfolio.filter(e => e.category === 'professional' || e.category === 'both')
@@ -44,15 +47,17 @@ export default function PortfolioPage() {
             </div>
             <div className="space-y-3">
               {section.items.map((event, i) => {
-                const color = getEventColor(allIds.indexOf(event.id))
+                const idx = allIds.indexOf(event.id)
+                const color = getThemedColor(theme, idx)
+                const bubbleColor = getBubbleColor(theme, idx, event.significance)
                 return (
                   <motion.div key={event.id}
                     initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                     onClick={() => router.push(`/event/${event.id}`)}
                     className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer active:scale-[0.99] transition-transform">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center text-white font-black text-sm shadow-md"
-                        style={{ background: color.bg }}>
+                      <div className="w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center font-black text-sm shadow-md"
+                        style={{ background: bubbleColor, color: textColorForBg(bubbleColor) }}>
                         {event.significance}★
                       </div>
                       <div className="flex-1 min-w-0">

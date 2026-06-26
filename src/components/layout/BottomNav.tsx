@@ -15,6 +15,7 @@ const tabs = [
 
 export function BottomNav() {
   const pathname = usePathname()
+  if (pathname.startsWith('/demo')) return null
 
   return (
     <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 pb-6 z-50 pointer-events-none">
