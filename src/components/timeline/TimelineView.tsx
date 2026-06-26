@@ -5,9 +5,7 @@ import { motion } from 'framer-motion'
 import { Event } from '@/types'
 import { getEventColor } from '@/lib/colors'
 
-interface TimelineViewProps {
-  events: Event[]
-}
+interface TimelineViewProps { events: Event[] }
 
 const SIZE: Record<number, number> = { 1: 76, 2: 90, 3: 106, 4: 122, 5: 142 }
 
@@ -19,44 +17,27 @@ function lighten(hex: string): string {
   return `rgb(${r},${g},${b})`
 }
 
-// Auto-scale font size to fit title in bubble
 function fontSize(title: string, size: number): number {
-  const words = title.split(' ').length
   const chars = title.length
   if (chars <= 8) return Math.min(13, size * 0.13)
   if (chars <= 14) return Math.min(12, size * 0.115)
   if (chars <= 20) return Math.min(11, size * 0.105)
-  if (words <= 4) return Math.min(10, size * 0.095)
+  if (title.split(' ').length <= 4) return Math.min(10, size * 0.095)
   return Math.min(9.5, size * 0.088)
 }
 
-// Progress ring SVG around bubble
 function ProgressRing({ size, count, color }: { size: number; count: number; color: string }) {
   if (count === 0) return null
   const r = size / 2 + 7
   const circ = 2 * Math.PI * r
   const filled = Math.min(count / 5, 1) * circ
   return (
-    <svg
-      className="absolute pointer-events-none"
-      style={{ left: -7, top: -7 }}
-      width={size + 14}
-      height={size + 14}
-    >
-      {/* Track */}
+    <svg className="absolute pointer-events-none" style={{ left: -7, top: -7 }} width={size + 14} height={size + 14}>
       <circle cx={(size + 14) / 2} cy={(size + 14) / 2} r={r} fill="none" stroke={`${color}22`} strokeWidth={3} />
-      {/* Progress */}
       <motion.circle
-        cx={(size + 14) / 2}
-        cy={(size + 14) / 2}
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={3}
-        strokeLinecap="round"
-        strokeDasharray={circ}
-        strokeDashoffset={circ - filled}
-        rotate="-90"
+        cx={(size + 14) / 2} cy={(size + 14) / 2} r={r}
+        fill="none" stroke={color} strokeWidth={3} strokeLinecap="round"
+        strokeDasharray={circ} strokeDashoffset={circ - filled}
         style={{ transformOrigin: 'center', transform: 'rotate(-90deg)' }}
         initial={{ strokeDashoffset: circ }}
         animate={{ strokeDashoffset: circ - filled }}
@@ -83,13 +64,7 @@ export function TimelineView({ events }: TimelineViewProps) {
   if (events.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          className="text-6xl mb-4"
-        >
-          🫧
-        </motion.div>
+        <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }} className="text-6xl mb-4">🫧</motion.div>
         <p className="text-gray-400 text-sm">No events yet. Tap + to add your first milestone.</p>
       </div>
     )
@@ -102,27 +77,15 @@ export function TimelineView({ events }: TimelineViewProps) {
   return (
     <div className="space-y-10">
       {byYear.map(([year, yearEvents]) => {
-        const sorted = [...yearEvents].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
-
+        const sorted = [...yearEvents].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
         return (
           <div key={year}>
-            {/* Year label */}
-            <motion.div
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-3 mb-6"
-            >
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-3 mb-6">
               <span className="text-sm font-black text-gray-300 tracking-widest">{year}</span>
               <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent" />
             </motion.div>
-
-            {/* Zigzag chronological timeline */}
             <div className="relative">
-              {/* Center spine */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-violet-200 via-blue-100 to-transparent" />
-
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-teal-200 via-teal-100 to-transparent" />
               <div className="space-y-2">
                 {sorted.map((event, i) => {
                   const idx = globalIndex++
@@ -131,10 +94,7 @@ export function TimelineView({ events }: TimelineViewProps) {
                   const isLeft = i % 2 === 0
                   const floatDuration = 3.4 + (idx % 4) * 0.5
                   const floatDelay = (idx * 0.41) % 2.8
-                  const month = new Date(event.date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                  })
+                  const month = new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                   const fs = fontSize(event.title, size)
 
                   return (
@@ -146,63 +106,37 @@ export function TimelineView({ events }: TimelineViewProps) {
                       className={`flex items-center gap-2 ${isLeft ? 'flex-row' : 'flex-row-reverse'}`}
                       style={{ minHeight: size + 32 }}
                     >
-                      {/* Bubble side */}
                       <div className={`flex-1 flex ${isLeft ? 'justify-end pr-3' : 'justify-start pl-3'}`}>
                         <motion.div
                           className="flex flex-col items-center"
                           animate={{ y: [0, -7, 0] }}
                           transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity, ease: 'easeInOut' }}
                         >
-                          {/* Glow halo */}
-                          <div
-                            className="absolute rounded-full pointer-events-none"
-                            style={{
-                              width: size + 28,
-                              height: size + 28,
-                              background: `radial-gradient(circle, ${color.bg}28 0%, transparent 70%)`,
-                              filter: 'blur(10px)',
-                              top: -14, left: -14,
-                            }}
-                          />
-
-                          {/* Bubble + progress ring */}
+                          <div className="absolute rounded-full pointer-events-none" style={{ width: size + 28, height: size + 28, background: `radial-gradient(circle, ${color.bg}28 0%, transparent 70%)`, filter: 'blur(10px)', top: -14, left: -14 }} />
                           <div className="relative cursor-pointer" onClick={() => router.push(`/event/${event.id}`)}>
                             <ProgressRing size={size} count={event.subEvents.length} color={color.bg} />
-
                             <motion.div
-                              whileTap={{ scale: 0.91 }}
-                              whileHover={{ scale: 1.06 }}
+                              whileTap={{ scale: 0.91 }} whileHover={{ scale: 1.06 }}
                               transition={{ type: 'spring', stiffness: 380, damping: 20 }}
                               className="relative rounded-full flex items-center justify-center text-white font-semibold text-center overflow-hidden"
                               style={{
-                                width: size,
-                                height: size,
+                                width: size, height: size,
                                 background: `radial-gradient(circle at 35% 28%, ${lighten(color.bg)}, ${color.bg} 68%)`,
                                 boxShadow: `0 10px 36px ${color.bg}75, 0 3px 10px ${color.bg}45, inset 0 1px 0 rgba(255,255,255,0.28)`,
-                                fontSize: fs,
-                                lineHeight: 1.25,
-                                padding: '14px',
+                                fontSize: fs, lineHeight: 1.25, padding: '14px',
                               }}
                             >
-                              {/* Shine */}
                               <div className="absolute rounded-full pointer-events-none" style={{ width: size * 0.44, height: size * 0.28, background: 'radial-gradient(ellipse, rgba(255,255,255,0.38) 0%, transparent 100%)', top: '13%', left: '17%' }} />
                               <span className="relative z-10 leading-snug">{event.title}</span>
                             </motion.div>
                           </div>
-
-                          {/* Date + sub-dot indicators */}
                           <div className="mt-2 flex flex-col items-center gap-1">
                             <span className="text-[10px] font-semibold text-gray-400">{month}</span>
                             {event.subEvents.length > 0 && (
                               <div className="flex gap-0.5">
                                 {Array.from({ length: Math.min(event.subEvents.length, 5) }).map((_, di) => (
-                                  <motion.div
-                                    key={di}
-                                    className="w-1 h-1 rounded-full"
-                                    style={{ background: color.bg, opacity: 0.55 }}
-                                    animate={{ scale: [1, 1.4, 1] }}
-                                    transition={{ duration: 2, delay: di * 0.3, repeat: Infinity }}
-                                  />
+                                  <motion.div key={di} className="w-1 h-1 rounded-full" style={{ background: color.bg, opacity: 0.55 }}
+                                    animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 2, delay: di * 0.3, repeat: Infinity }} />
                                 ))}
                               </div>
                             )}
@@ -210,34 +144,21 @@ export function TimelineView({ events }: TimelineViewProps) {
                         </motion.div>
                       </div>
 
-                      {/* Center dot */}
                       <div className="flex-shrink-0 flex flex-col items-center z-10">
-                        <motion.div
-                          className="w-3 h-3 rounded-full border-2 border-white shadow-md"
+                        <motion.div className="w-3 h-3 rounded-full border-2 border-white shadow-md"
                           style={{ background: color.bg, boxShadow: `0 0 8px ${color.bg}80` }}
-                          animate={{ scale: [1, 1.2, 1] }}
-                          transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity }}
-                        />
+                          animate={{ scale: [1, 1.2, 1] }} transition={{ duration: floatDuration, delay: floatDelay, repeat: Infinity }} />
                       </div>
 
-                      {/* Info side */}
                       <div className={`flex-1 ${isLeft ? 'pl-3' : 'pr-3 text-right'}`}>
-                        <motion.div
-                          whileTap={{ scale: 0.97 }}
-                          onClick={() => router.push(`/event/${event.id}`)}
-                          className="inline-block cursor-pointer"
-                        >
+                        <motion.div whileTap={{ scale: 0.97 }} onClick={() => router.push(`/event/${event.id}`)} className="inline-block cursor-pointer">
                           <div className="flex flex-wrap gap-1 mb-1" style={{ justifyContent: isLeft ? 'flex-start' : 'flex-end' }}>
                             {event.skills.slice(0, 2).map(s => (
-                              <span key={s} className="text-[9px] px-2 py-0.5 rounded-full font-semibold" style={{ background: color.light, color: color.bg }}>
-                                {s}
-                              </span>
+                              <span key={s} className="text-[9px] px-2 py-0.5 rounded-full font-semibold" style={{ background: color.light, color: color.bg }}>{s}</span>
                             ))}
                           </div>
                           {event.visibility === 'portfolio' && (
-                            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: color.bg }}>
-                              ✦ Portfolio
-                            </span>
+                            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: color.bg }}>✦ Portfolio</span>
                           )}
                           {event.subEvents.length > 0 && (
                             <p className="text-[10px] text-gray-400 mt-0.5">{event.subEvents.length} micro-win{event.subEvents.length > 1 ? 's' : ''}</p>

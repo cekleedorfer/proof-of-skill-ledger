@@ -1,157 +1,103 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Plus } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Plus, Flame, Star, Zap } from 'lucide-react'
 import { useStore } from '@/lib/store'
-import { PageShell } from '@/components/layout/PageShell'
 import { TimelineView } from '@/components/timeline/TimelineView'
-import { Category } from '@/types'
-import { getEventColor } from '@/lib/colors'
 
-type Filter = 'all' | Category | 'portfolio'
-
-const filters: { label: string; value: Filter }[] = [
-  { label: 'All', value: 'all' },
-  { label: 'Professional', value: 'professional' },
-  { label: 'Personal', value: 'personal' },
-  { label: 'Portfolio', value: 'portfolio' },
+type Filter = 'all' | 'professional' | 'personal' | 'portfolio'
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: 'all', label: 'All' },
+  { key: 'professional', label: 'Career' },
+  { key: 'personal', label: 'Personal' },
+  { key: 'portfolio', label: 'Portfolio' },
 ]
 
-// Floating ambient orbs behind everything
-function AmbientOrbs() {
-  return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" style={{ maxWidth: 430, margin: '0 auto' }}>
-      {[
-        { color: '#c4b5fd', x: '10%', y: '8%', size: 180, dur: 8 },
-        { color: '#93c5fd', x: '70%', y: '20%', size: 140, dur: 10 },
-        { color: '#f9a8d4', x: '50%', y: '55%', size: 160, dur: 9 },
-        { color: '#6ee7b7', x: '20%', y: '75%', size: 120, dur: 11 },
-        { color: '#fde68a', x: '80%', y: '70%', size: 100, dur: 7 },
-      ].map((orb, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: orb.x, top: orb.y,
-            width: orb.size, height: orb.size,
-            background: `radial-gradient(circle, ${orb.color}55 0%, transparent 70%)`,
-            filter: 'blur(32px)',
-            transform: 'translate(-50%, -50%)',
-          }}
-          animate={{ x: [0, 18, -12, 0], y: [0, -14, 10, 0], scale: [1, 1.08, 0.96, 1] }}
-          transition={{ duration: orb.dur, repeat: Infinity, ease: 'easeInOut', delay: i * 1.4 }}
-        />
-      ))}
-    </div>
-  )
-}
-
-export default function HomePage() {
+export default function Home() {
   const { events } = useStore()
   const router = useRouter()
-  const [activeFilter, setActiveFilter] = useState<Filter>('all')
-
-  const totalSkills = new Set(events.flatMap(e => e.skills)).size
-  const totalWins = events.reduce((s, e) => s + e.subEvents.length, 0)
-  const topEvent = [...events].sort((a, b) => b.significance - a.significance)[0]
-  const topColor = topEvent ? getEventColor(events.map(e => e.id).indexOf(topEvent.id)).bg : '#7C3AED'
+  const [filter, setFilter] = useState<Filter>('all')
 
   const filtered = events.filter(e => {
-    if (activeFilter === 'all') return true
-    if (activeFilter === 'portfolio') return e.visibility === 'portfolio'
-    return e.category === activeFilter || e.category === 'both'
+    if (filter === 'all') return true
+    if (filter === 'portfolio') return e.visibility === 'portfolio'
+    return e.category === filter || e.category === 'both'
   })
 
+  const totalSubs = events.reduce((acc, e) => acc + e.subEvents.length, 0)
+  const portfolioCount = events.filter(e => e.visibility === 'portfolio').length
+  const topSkills = [...new Set(events.flatMap(e => e.skills))].slice(0, 3)
+
   return (
-    <div className="relative min-h-dvh pb-32" style={{ background: 'linear-gradient(160deg, #f3f0ff 0%, #eff6ff 40%, #fdf2f8 100%)' }}>
-      <AmbientOrbs />
+    <div className="min-h-dvh pb-32 relative overflow-hidden" style={{ background: 'linear-gradient(160deg, #f0fdfa 0%, #fff7ed 50%, #f0fdf4 100%)' }}>
+      <div className="absolute top-[-80px] left-[-60px] w-64 h-64 rounded-full opacity-30 pointer-events-none" style={{ background: 'radial-gradient(circle, #0d9488 0%, transparent 70%)', filter: 'blur(48px)' }} />
+      <div className="absolute top-[120px] right-[-80px] w-72 h-72 rounded-full opacity-20 pointer-events-none" style={{ background: 'radial-gradient(circle, #fb923c 0%, transparent 70%)', filter: 'blur(56px)' }} />
+      <div className="absolute top-[420px] left-[-40px] w-56 h-56 rounded-full opacity-15 pointer-events-none" style={{ background: 'radial-gradient(circle, #4ade80 0%, transparent 70%)', filter: 'blur(40px)' }} />
 
-      <div className="relative z-10 px-4 pt-5">
-        {/* Header */}
-        <div className="mb-5">
-          <p className="text-[10px] font-black text-violet-400 uppercase tracking-[0.2em] mb-1">Your Story</p>
-          <h1 className="text-2xl font-black text-gray-900 leading-tight">Proof-of-Skill Ledger</h1>
-          <p className="text-xs text-gray-400 mt-0.5">Every milestone. Every win. Forever.</p>
-        </div>
-
-        {/* Stats strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex gap-2 mb-5"
-        >
-          {[
-            { icon: <Star className="w-3.5 h-3.5" />, value: events.length, label: 'Events', color: '#7C3AED' },
-            { icon: <Zap className="w-3.5 h-3.5" />, value: totalWins, label: 'Micro-wins', color: '#EC4899' },
-            { icon: <Flame className="w-3.5 h-3.5" />, value: totalSkills, label: 'Skills', color: '#F59E0B' },
-          ].map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 + i * 0.06 }}
-              className="flex-1 rounded-2xl p-2.5 flex flex-col items-center gap-0.5 border border-white/60 backdrop-blur-sm"
-              style={{ background: `${s.color}12` }}
-            >
-              <div style={{ color: s.color }}>{s.icon}</div>
-              <span className="text-lg font-black text-gray-900">{s.value}</span>
-              <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-wide">{s.label}</span>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Segmented control */}
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl p-1 flex mb-6 shadow-sm border border-white/80 overflow-x-auto scrollbar-hide">
-          {filters.map(f => (
-            <button
-              key={f.value}
-              onClick={() => setActiveFilter(f.value)}
-              className={`relative flex-1 min-w-max px-3 py-1.5 text-[11px] font-bold rounded-xl transition-colors whitespace-nowrap ${
-                activeFilter === f.value ? 'text-white' : 'text-gray-400'
-              }`}
-            >
-              {activeFilter === f.value && (
-                <motion.div
-                  layoutId="seg-pill"
-                  className="absolute inset-0 rounded-xl"
-                  style={{ background: `linear-gradient(135deg, #7C3AED, #3B82F6)` }}
-                  transition={{ type: 'spring', stiffness: 420, damping: 36 }}
-                />
-              )}
-              <span className="relative z-10">{f.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Timeline */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeFilter}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+      <div className="relative px-4 pt-6 pb-4">
+        <div className="flex items-start justify-between mb-1">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#0F766E' }}>Proof of Skill</p>
+            <h1 className="text-3xl font-black text-gray-900 leading-tight">Your Ledger</h1>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={() => router.push('/add')}
+            className="w-11 h-11 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-teal-300/40 mt-1"
+            style={{ background: 'linear-gradient(135deg, #0F766E, #0891B2)' }}
           >
+            <Plus className="w-5 h-5" strokeWidth={2.5} />
+          </motion.button>
+        </div>
+
+        <div className="mt-4 rounded-2xl px-4 py-3 flex items-center justify-between text-white shadow-lg"
+          style={{ background: 'linear-gradient(135deg, #0F766E 0%, #0891B2 100%)' }}>
+          <div className="text-center">
+            <p className="text-xl font-black">{events.length}</p>
+            <p className="text-[10px] font-semibold opacity-75">Events</p>
+          </div>
+          <div className="w-px h-8 bg-white/20" />
+          <div className="text-center">
+            <p className="text-xl font-black">{totalSubs}</p>
+            <p className="text-[10px] font-semibold opacity-75">Micro-Wins</p>
+          </div>
+          <div className="w-px h-8 bg-white/20" />
+          <div className="text-center">
+            <p className="text-xl font-black">{portfolioCount}</p>
+            <p className="text-[10px] font-semibold opacity-75">Portfolio</p>
+          </div>
+          <div className="w-px h-8 bg-white/20" />
+          <div className="text-center flex-1 min-w-0 pl-2">
+            <div className="flex flex-wrap gap-0.5 justify-center">
+              {topSkills.map(s => <span key={s} className="text-[8px] bg-white/20 rounded-full px-1.5 py-0.5 font-semibold">{s}</span>)}
+            </div>
+            <p className="text-[10px] font-semibold opacity-75 mt-0.5">Top Skills</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mt-4 overflow-x-auto pb-1 hide-scrollbar">
+          {FILTERS.map(f => (
+            <motion.button key={f.key} onClick={() => setFilter(f.key)} whileTap={{ scale: 0.95 }}
+              className="flex-shrink-0 px-4 py-2 rounded-full text-xs font-semibold transition-all"
+              style={filter === f.key
+                ? { background: 'linear-gradient(135deg, #0F766E, #0891B2)', color: 'white', boxShadow: '0 4px 12px rgba(15,118,110,0.35)' }
+                : { background: 'white', color: '#6B7280', border: '1px solid #E5E7EB' }
+              }>
+              {f.label}
+            </motion.button>
+          ))}
+        </div>
+      </div>
+
+      <div className="relative px-4">
+        <AnimatePresence mode="wait">
+          <motion.div key={filter} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             <TimelineView events={filtered} />
           </motion.div>
         </AnimatePresence>
       </div>
-
-      {/* FAB */}
-      <motion.button
-        onClick={() => router.push('/add')}
-        whileTap={{ scale: 0.88 }}
-        animate={{ boxShadow: ['0 0 0 0 #7C3AED44', '0 0 0 14px #7C3AED00', '0 0 0 0 #7C3AED44'] }}
-        transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
-        className="fixed bottom-28 right-4 w-14 h-14 rounded-2xl flex items-center justify-center z-40"
-        style={{ background: 'linear-gradient(135deg, #7C3AED, #3B82F6)' }}
-        aria-label="Add new event"
-      >
-        <Plus className="w-6 h-6 text-white" strokeWidth={2.5} />
-      </motion.button>
     </div>
   )
 }

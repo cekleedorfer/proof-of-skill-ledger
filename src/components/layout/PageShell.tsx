@@ -1,12 +1,9 @@
-interface PageShellProps {
-  children: React.ReactNode
-  className?: string
-}
+import { ReactNode } from 'react'
 
-export function PageShell({ children, className = '' }: PageShellProps) {
+export function PageShell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <main className={`pt-4 pb-32 px-4 min-h-dvh ${className}`}>
+    <div className={`min-h-dvh pb-32 bg-[#f5f5f7] px-4 pt-5 ${className ?? ''}`}>
       {children}
-    </main>
+    </div>
   )
 }

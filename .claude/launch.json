@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "proof-of-skill-ledger",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "name": "proof-of-skill",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["http-server", "out", "-p", "4001", "-s"],
+      "port": 4001
     }
   ]
 }
