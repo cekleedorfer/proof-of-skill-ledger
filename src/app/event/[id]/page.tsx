@@ -29,45 +29,58 @@ export default function EventDetailPage({ params }: { params: Promise<{ id: stri
   const color = getEventColor(allIds.indexOf(id))
 
   return (
-    <div className="min-h-dvh pb-32" style={{ background: `linear-gradient(160deg, ${color.light} 0%, #f5f5f7 35%)` }}>
-      <div className="px-4 pt-4">
-        {/* Back */}
-        <button
-          onClick={() => router.back()}
-          className="flex items-center gap-1.5 font-semibold text-sm mb-6"
-          style={{ color: color.bg }}
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </button>
+    <div className="min-h-dvh pb-32 bg-[#f5f5f7]">
+      {/* Hero header */}
+      <div className="relative overflow-hidden pb-6" style={{ background: `linear-gradient(150deg, ${color.bg} 0%, ${color.bg}cc 100%)` }}>
+        {/* Shine overlay */}
+        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 70% 10%, white, transparent 55%)' }} />
+        {/* Ambient glow */}
+        <div className="absolute -bottom-8 -right-8 w-48 h-48 rounded-full opacity-20" style={{ background: `radial-gradient(circle, white, transparent 70%)` }} />
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-6"
-        >
-          <h1 className="text-xl font-bold text-gray-900 leading-snug mb-2">{event.title}</h1>
-          <div className="flex items-center justify-center gap-3">
-            <div className="flex items-center gap-1 text-gray-400">
-              <Calendar className="w-3.5 h-3.5" />
-              <span className="text-xs">
-                {new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </span>
-            </div>
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: event.significance }).map((_, i) => (
-                <Star key={i} className="w-3 h-3 fill-current" style={{ color: color.bg }} />
-              ))}
-            </div>
-          </div>
-        </motion.div>
+        <div className="relative px-4 pt-5">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center gap-1.5 font-semibold text-sm text-white/80 mb-5"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
 
-        {/* Tabs */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-white/60 capitalize">{event.category}</span>
+              {event.visibility === 'portfolio' && (
+                <span className="text-[9px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full uppercase tracking-wide">✦ Portfolio</span>
+              )}
+            </div>
+            <h1 className="text-2xl font-black text-white leading-tight mb-3">{event.title}</h1>
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 text-white/70">
+                <Calendar className="w-3.5 h-3.5" />
+                <span className="text-xs font-medium">
+                  {new Date(event.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={`w-3.5 h-3.5 ${i < event.significance ? 'fill-white text-white' : 'text-white/25'}`} />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Tabs — slightly overlapping hero */}
+      <div className="px-4 -mt-1">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
+          transition={{ delay: 0.1 }}
         >
           <EventTabs event={event} eventColor={color.bg} eventLightColor={color.light} allIds={allIds} />
         </motion.div>

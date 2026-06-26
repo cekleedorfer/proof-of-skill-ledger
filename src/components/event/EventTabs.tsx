@@ -36,34 +36,47 @@ function lightenHex(hex: string): string {
   return `rgb(${r},${g},${b})`
 }
 
+function bubbleFontSize(title: string, size: number): number {
+  const chars = title.length
+  const base = size * 0.115
+  if (chars <= 6) return Math.min(13, base * 1.1)
+  if (chars <= 10) return Math.min(12, base)
+  if (chars <= 16) return Math.min(11, base * 0.92)
+  if (chars <= 22) return Math.min(10, base * 0.84)
+  if (chars <= 30) return Math.min(9.5, base * 0.78)
+  return Math.min(8.5, base * 0.72)
+}
+
 // Orbital layout: place sub-event bubbles around the central event
 function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: string[]; onSubClick: (subId: string) => void }) {
   const subs = event.subEvents
   const centerColor = getEventColor(allIds.indexOf(event.id)).bg
 
-  // Positions for up to 6 sub-bubbles arranged around center
+  // Positions spread wider to avoid overlap with larger bubbles
   const positions = [
-    { x: -125, y: -65 },
-    { x: 115, y: -75 },
-    { x: -135, y: 55 },
-    { x: 120, y: 60 },
-    { x: -20, y: -125 },
-    { x: 15, y: 115 },
+    { x: -140, y: -70 },
+    { x: 125, y: -80 },
+    { x: -148, y: 62 },
+    { x: 132, y: 68 },
+    { x: -18, y: -138 },
+    { x: 14, y: 128 },
   ]
 
   const subColors = ['#EC4899', '#10B981', '#F59E0B', '#3B82F6', '#EF4444', '#06B6D4']
 
   return (
-    <div className="relative flex items-center justify-center" style={{ height: 280 }}>
-      {/* Subtle orbit ring */}
-      <div className="absolute rounded-full border border-dashed border-gray-200" style={{ width: 220, height: 220 }} />
+    <div className="relative flex items-center justify-center" style={{ height: 320 }}>
+      {/* Orbit rings */}
+      <div className="absolute rounded-full border border-dashed opacity-20" style={{ width: 240, height: 240, borderColor: centerColor }} />
+      <div className="absolute rounded-full border opacity-10" style={{ width: 170, height: 170, borderColor: centerColor }} />
 
       {/* Sub-event bubbles */}
       {subs.map((sub, i) => {
         const pos = positions[i % positions.length]
         const subColor = subColors[i % subColors.length]
-        const sizeMap: Record<number, number> = { 1: 54, 2: 70, 3: 88, 4: 100, 5: 118 }
-        const size = sizeMap[sub.significance] ?? 70
+        const sizeMap: Record<number, number> = { 1: 60, 2: 76, 3: 94, 4: 108, 5: 124 }
+        const size = sizeMap[sub.significance] ?? 76
+        const fs = bubbleFontSize(sub.title, size)
         return (
           <motion.button
             key={sub.id}
@@ -71,23 +84,24 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.1 + i * 0.08, type: 'spring', stiffness: 300, damping: 22 }}
             whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.06 }}
             onClick={() => onSubClick(sub.id)}
             className="absolute rounded-full flex items-center justify-center text-white font-semibold text-center leading-tight cursor-pointer overflow-hidden"
             style={{
               width: size,
               height: size,
-              background: `radial-gradient(circle at 35% 30%, ${subColor}dd, ${subColor} 70%)`,
+              background: `radial-gradient(circle at 35% 30%, ${lightenHex(subColor)}, ${subColor} 70%)`,
               boxShadow: `0 8px 28px ${subColor}70, 0 2px 8px ${subColor}40, inset 0 1px 0 rgba(255,255,255,0.25)`,
               top: '50%',
               left: '50%',
               marginTop: -size / 2 + pos.y,
               marginLeft: -size / 2 + pos.x,
-              fontSize: size > 90 ? 10 : 9,
-              padding: 8,
+              fontSize: fs,
+              padding: 10,
             }}
           >
-            <div className="absolute rounded-full pointer-events-none" style={{ width: size * 0.45, height: size * 0.28, background: 'radial-gradient(ellipse, rgba(255,255,255,0.35) 0%, transparent 100%)', top: '13%', left: '18%' }} />
-            <span className="relative leading-tight z-10">{sub.title.length > 14 ? sub.title.slice(0, 12) + '…' : sub.title}</span>
+            <div className="absolute rounded-full pointer-events-none" style={{ width: size * 0.45, height: size * 0.28, background: 'radial-gradient(ellipse, rgba(255,255,255,0.38) 0%, transparent 100%)', top: '13%', left: '18%' }} />
+            <span className="relative leading-tight z-10">{sub.title}</span>
           </motion.button>
         )
       })}
@@ -99,16 +113,16 @@ function OrbitalLayout({ event, allIds, onSubClick }: { event: Event; allIds: st
         transition={{ type: 'spring', stiffness: 300, damping: 22 }}
         className="relative z-10 rounded-full flex items-center justify-center text-white font-bold text-center leading-tight overflow-hidden"
         style={{
-          width: 120,
-          height: 120,
+          width: 130,
+          height: 130,
           background: `radial-gradient(circle at 35% 30%, ${lightenHex(centerColor)}, ${centerColor} 65%)`,
           boxShadow: `0 12px 40px ${centerColor}80, 0 4px 12px ${centerColor}50, inset 0 1px 0 rgba(255,255,255,0.3)`,
-          fontSize: 11,
-          padding: 14,
+          fontSize: bubbleFontSize(event.title, 130),
+          padding: 16,
         }}
       >
-        <div className="absolute rounded-full pointer-events-none" style={{ width: 54, height: 34, background: 'radial-gradient(ellipse, rgba(255,255,255,0.3) 0%, transparent 100%)', top: '13%', left: '18%' }} />
-        <span className="relative leading-tight z-10">{event.title.length > 20 ? event.title.slice(0, 18) + '…' : event.title}</span>
+        <div className="absolute rounded-full pointer-events-none" style={{ width: 58, height: 36, background: 'radial-gradient(ellipse, rgba(255,255,255,0.32) 0%, transparent 100%)', top: '13%', left: '18%' }} />
+        <span className="relative leading-tight z-10">{event.title}</span>
       </motion.div>
     </div>
   )
