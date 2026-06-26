@@ -19,7 +19,6 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 * 🎨 Animated, glow-bubble timeline UI with a violet-to-pink gradient design system
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-## How It Works
 
 ## Learn More
 1. Log an event — title, date, category (professional / personal / both), and significance
@@ -46,11 +45,6 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 
 ## Installation & Running Locally
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-To run Proof-of-Skill Ledger locally:
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 1. Clone the repository
 
 ```
