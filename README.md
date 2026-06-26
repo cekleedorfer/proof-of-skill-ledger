@@ -9,26 +9,6 @@ A mobile-first ledger for tracking every professional and personal milestone —
 
 Growth happens in tiny moments — a hard bug fixed, a hard conversation handled, a new skill that finally clicked. Almost none of it gets written down, and by the time a performance review, interview, or portfolio update rolls around, it's gone.
 
-## Getting Started
-Resumes and LinkedIn capture job titles, not the actual proof of skill behind them.
-
-First, run the development server:
-We kept asking: *what if there were a personal ledger that captured the receipts — every milestone, every micro-win, timestamped and tied to the skill it grew?*
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-That question became Proof-of-Skill Ledger — a mobile-first app that turns your scattered growth into a chronological, provable record.
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-## Features
-
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 * 📖 Chronological timeline of every professional and personal milestone
 * 🧩 Sub-events ("micro-wins") nested under each milestone, each with its own skill tags and story
